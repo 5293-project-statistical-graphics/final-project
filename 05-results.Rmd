@@ -5,10 +5,128 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.align =
 ``` 
 
 ```{r}
-library(lubridate)
-library(tidyverse)
 library(ggridges)
+library(lubridate)
+library(stringi)
+library(stopwords)
+library(tidyverse)
 ```
+
+## commits
+We firstly focus on the message of commits. Each message can provide some information of the packages. We select the English content and drop the punctuation marks and stop words to do some pre-processing.
+```{r}
+commits <- read_csv("resources/data/commits.csv")
+#separate the un-English content
+commits<-commits %>%
+  mutate(encoding_message=stri_enc_mark(message))
+
+commits <- commits %>%
+  filter(encoding_message=="ASCII")
+
+commits_gg<-commits %>%
+  filter(repo=="ggplot2")
+commits_gg_short<-commits %>%
+  filter(year(date)>= 2014 & repo=="ggplot2")
+commits_ly<-commits %>%
+  filter(repo=="plotly.R")
+
+#summary of message length
+summary_gg<-tibble(summary(nchar(commits_gg$message,type="bytes"), na.rm = T)) 
+rownames(summary_gg)<-c("Min","1st Qu","Median","Mean","3rd Qu","Max")
+summary_gg_short<-tibble(round(summary(nchar(commits_gg_short$message,type="bytes"), na.rm = T),2)) 
+rownames(summary_gg_short)<-c("Min","1st Qu","Median","Mean","3rd Qu","Max")
+summary_ly<-tibble(round(summary(nchar(commits_ly$message,type="bytes"), na.rm = T),2))
+rownames(summary_ly)<-c("Min","1st Qu","Median","Mean","3rd Qu","Max")
+summary<-cbind(summary_gg,summary_ly,summary_gg_short)
+colnames(summary)<-c("ggplot2","plotly","ggplot2_comparable")
+summary
+
+
+commits_gg <- commits_gg %>%
+  mutate(message_string=sapply(message, clean_string)) %>%
+  mutate(message_split=strsplit(message_string," ")) %>% 
+  mutate(message_length=sapply(message_split, length))
+
+commits_ly <- commits_ly %>%
+  mutate(message_string=sapply(message, clean_string)) %>%
+  mutate(message_split=strsplit(message_string," ")) %>% 
+  mutate(message_length=sapply(message_split, length))
+
+commits_gg_short <- commits_gg_short %>%
+  mutate(message_string=sapply(message, clean_string)) %>%
+  mutate(message_split=strsplit(message_string," ")) %>% 
+  mutate(message_length=sapply(message_split, length))
+
+#ridge line plot for two packages use the length<=75
+commits_ggly<-rbind(commits_ly %>% filter(message_length<=75),commits_gg_short %>% filter(message_length<=75))
+ggplot(commits_ggly, aes(x=message_length, y=repo, fill = factor(stat(quantile)))) +
+  stat_density_ridges(
+    geom = "density_ridges_gradient", calc_ecdf = TRUE,
+    quantiles = 4, quantile_lines = TRUE
+  ) +
+  scale_fill_viridis_d(name = "Quartiles")
+
+# drop top 10% of the message length
+commit_message_len_first_90_perc_gg <- commits_gg %>% 
+  arrange(message_length) %>% 
+  mutate(rank = row_number(message_length)) %>%
+  filter(rank < 0.90 * nrow(commits))
+
+commit_message_len_first_90_perc_ly <- commits_ly %>% 
+  arrange(message_length) %>% 
+  mutate(rank = row_number(message_length)) %>%
+  filter(rank < 0.90 * nrow(commits))
+
+#frequency of each word
+split_table_gg <- commit_message_len_first_90_perc_gg %>% select(message_split) %>%
+  unnest(message_split) %>%
+  group_by(message_split) %>%
+  count(name = "Freq") %>%
+  filter(! message_split %in% stopwords("en", source = "snowball")) %>%
+  arrange(desc(Freq))
+
+split_table_ly <- commit_message_len_first_90_perc_ly %>% select(message_split) %>%
+  unnest(message_split) %>%
+  group_by(message_split) %>%
+  count(name = "Freq") %>%
+  filter(! message_split %in% stopwords("en", source = "snowball")) %>%
+  arrange(desc(Freq))
+#word cloud
+library(wordcloud2)
+wordcloud2(split_table_gg %>% filter(Freq>1))
+```
+From the summary of message length that we calculate, the mean of message length for "ggplot2" is higher than that of "plotly". For the median, "ggplot2" is still higher than "plotly". In order to compare clearly, we constrict the comparing time period to "2014-present". It shows that although "plotly" was created, users are always willing to use "ggplot2". "ggplot2" was still popular.     
+From the ridgeline plot, the distribution of these two packages is quite similar but "plotly.R" has a sharper peak and "ggplot2" has a longer tail.  
+From the word cloud, for "ggplot2", we can see the most frequent word appeared is "fix". For "plotly", we can see the most frequent work appeared is "merge", "fix" and "plotly", "add" and "pull".
+
+```{r}
+#bar plot for message length
+commits_ggly$date<-as.Date(commits_ggly$date)
+commits_ggly<-commits_ggly %>%mutate(weekday=weekdays.Date(date)) 
+commits_ggly$weekday<-factor(commits_ggly$weekday,levels=c("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"))
+commits_ggly %>%
+  ggplot(aes(x=weekday))+
+  geom_bar(stat="count")+
+  facet_wrap(~repo)
+```
+
+Most of the commits made during weekdays but not the weekend. When comparing two packages, the overall commits amount of plotly is higher than ggplot2.
+
+```{r}
+commits$date<-as.Date(commits$date)
+commits %>%
+  select(repo,date) %>%
+  mutate(year=year(date)-2000) %>%
+  group_by(repo,year) %>%
+  count(name="number") %>%
+  filter(year!=22) %>%
+  ggplot(aes(x=year,y=number))+geom_line()+facet_wrap(~repo)+
+  scale_x_continuous(breaks=7:21)+
+  labs(x="made at(year)",y="number of commits",title="Number of commits made from 2007 to 2021")
+```
+
+The number of commits made fluctuates during time. And for ggplot2, the period of fluctuation is about 3 or 4 years. When plotly was created, there is a huge increase on the number of commits made. And the same situation can be seen in ggplot2. And after 2018, the number of commits for these two packages are decreasing.
+
 ## issue
 Issue is the key part where users and developers interact with each other. The number of issues can somewhat show the popularity of a package.
 ```{r}
@@ -103,7 +221,7 @@ issue %>%
   theme_ridges()
     
 ```
-
+## pull requests
 ```{r}
 pull <- read_csv("resources/data/pull_requests.csv") %>% filter(year(created_at) >= 2014)
 pull %>% 
