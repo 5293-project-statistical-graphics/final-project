@@ -1,18 +1,56 @@
 # Data sources
 
-Our data come from [the GHTorrent Project](https://ghtorrent.org/){target="_blank"}, which is "an effort to create a scalable, queriable, offline mirror of data offered through the Github REST API." It includes the complete data up to 2019-06-30 (in the format of MySql dumps and MongoDB daily dumps). Due to our limited computing power, we choose to use only one day's data (the raw data is about 23 gigabytes), [2019-06-30](http://ghtorrent-downloads.ewi.tudelft.nl/mongo-daily/mongo-dump-2019-06-30.tar.gz){target="_blank"}.
-
-The raw GHTorrent data consists of 16 tables and is stored in [bson](https://en.wikipedia.org/wiki/BSON){target="_blank"} format. The schema is provided under the resources/schema folder:
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.align = "center")
+```
+We used GitHub REST API to crawl two popular R package's repositories, ggplot2 and plotly and we will focus on the repositorie main branche' commits, issues and pull requests since these three components can provide some insights on the popularity, development change over time.
 
 ```{r}
-list.files("resources/schema")
+library(gh)
+library(jsonlite)
+library(readr)
+library(dplyr)
 ```
 
-And a typical schema file of the table includes three elements: the number of records, the schema of one record, and an example record:
-
+The following function will crawl the "content" of `github.com/owner/repo` where "content" can be commits, issues, or others, more info [here](https://docs.github.com/en/rest){target="_blank"}. Notice that the issues API will return both issues and pull requests.
 ```{r}
-file = file("resources/schema/commits.txt")
-lines = c("resources/schema/commits.txt:", readLines(file, n = 10), "...")
-paste(lines, "\n") |> noquote() |> cat()
-close(file)
+crawler <- function(owner, repo, content){
+  page <- 1
+  data.raw <- list()
+  cat("Each dot represent 100 records.\n")
+  while(TRUE){
+    response <- 
+      gh("GET /repos/{owner}/{repo}/{content}", owner = owner,
+         repo = repo, content = content, per_page = 100, page = page, state = "all") 
+    cat(".")
+    data.raw <- c(data.raw, response)
+    page <- page + 1
+    # when the returned data has less than 100 records, break the loop since all the record has been crawled
+    if(length(response) != 100) break
+  }
+  write_file(toJSON(data.raw, pretty=TRUE, auto_unbox=TRUE), 
+             file = paste("resources/rawdata/", repo, "_", content, ".json", sep = ""))
+}
+### not run
+# code used to crawl commits and issues of ggplot2 and plotly
+# crawler(owner = "tidyverse", repo = "ggplot2", content = "commits")
+# crawler(owner = "plotly", repo = "plotly.R", content = "commits")
+# crawler(owner = "tidyverse", repo = "ggplot2", content = "issues")
+# crawler(owner = "plotly", repo = "plotly.R", content = "issues")
+### END not run
 ```
+
+Up until the last crawling ("2022-04-27 9:00 pm"), ggplot2 has `r length(read_json(path = "resources/rawdata/ggplot2_commits.json"))` commits and has `r length(read_json(path = "resources/rawdata/ggplot2_issues.json"))` issues and pull requests; while plotly.R has `r length(read_json(path = "resources/rawdata/plotly.R_commits.json"))` commits and has `r length(read_json(path = "resources/rawdata/plotly.R_issues.json"))` issues and pull requests. 
+```{r, echo = FALSE}
+commit.ggplot.raw <- read_json(path = "resources/rawdata/ggplot2_commits.json")
+commit.plotly.raw <- read_json(path = "resources/rawdata/plotly.R_commits.json")
+issues.ggplot.raw <- read_json(path = "resources/rawdata/ggplot2_issues.json")
+issues.plotly.raw <- read_json(path = "resources/rawdata/plotly.R_issues.json")
+tibble(file_name = c("ggplot2_commits", "ggplot2_issues", "plotly.R_commits", "plotly.R_issues"),
+  file = c(list(commit.ggplot.raw), list(issues.ggplot.raw), list(commit.plotly.raw), list(issues.plotly.raw)),
+  length = sapply(file, length)) %>%
+  select(-file) %>%
+  print()
+```
+
+The raw data provide a lot of info about the commits, issues and pull requests, including the author (and his/her detailed info), the time, the message/body. Raw data can be found under [resources/rawdata](https://github.com/5293-project-statistical-graphics/final-project/tree/main/resources/rawdata){target="_blank} folder
