@@ -59,7 +59,7 @@ library(gridExtra)
 grid.arrange(g2,g3,g1,ncol=2)
 ```
 
-From the overview, we can find a significant difference in numbers between weekdays and weekend. Users of Github prefer to create pull requests, issues and commits during weekdays rather than weekends. When comparing these two packages, the number of all pull requests, issues and commits are smaller than ggplot2. And there is a great gap for the number of pull requests in these two packages.
+Users of Github prefer to create pull requests, issues and commits during weekdays rather than weekends. The number of all pull requests, issues and commits for plotly are smaller than ggplot2. ggplot2 is more popular than plotly on Github.
 
 
 ```{r}
@@ -104,7 +104,9 @@ library(gridExtra)
 grid.arrange(g5,g6,g4,ncol=2)
 ```
 
-The data avalible for plotly is from 2014. For plotly, the number of issues and commits first increases and then has a decreasing trend after 2016. And for number of pull request of plotly, it has a decreasing trend. For ggplot2, the number of issues, pull requests and commits have a fluctuate process. In the first two years, the number of these three parts is increasing and for the last four years, especially after the pandemic, the number of these three parts has a decreasing trend. In particular, the number of commits for ggplot2 has a significant period fluctuation during time. Besides, after 2018, plotly is in the decreasing trend, which is partly due to the pandemic.
+For plotly, the number of issues and commits first increases and then has a decreasing trend after 2016. And for number of pull request of plotly, it has a decreasing trend. For ggplot2, the number of issues, pull requests and commits have a fluctuate process.  
+Users are more interested in the package when it newly came out. After pandemic, less focus is put on these two packages.  
+In particular, the number of commits for ggplot2 has a significant period fluctuation during time.   
 
 ```{r}
 g7<-issue %>% 
@@ -142,7 +144,7 @@ g8<-pull %>%
 grid.arrange(g7,g8,ncol=1)
 ```
 
-When we look into the author association for pull requests and issues, we can draw more analysis conclusions. Due to the same meaning in the definition of "COLLABORATOR" and "MEMBER" in these two packages, we combine these two classes into "MEMBER". When comparing issues and pull requests, "NONE" have created more issues than any other author associations during time. But for pull requests, "MEMBER" dominates mostly and "NONE" is in the low position in the plot. From 2020, partly due to pandemic, the number for both issues and pull requests, of all author associations, for both packages decreases.
+Due to the same meaning in the definition of "COLLABORATOR" and "MEMBER" in these two packages, we combine these two classes into "MEMBER". Issues are mainly created by common users of these packages. Pull requests are mostly created by members of these packages. Due to pandemic, these packages are not as popular as before.
 
 
 ```{r}
