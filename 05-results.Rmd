@@ -10,6 +10,19 @@ library(lubridate)
 library(stringi)
 library(stopwords)
 library(tidyverse)
+library(qdapRegex)
+```
+```{r}
+# function used to clean commit messages and issue/pull request comments
+clean_string <- function(string){
+  string <- gsub("'t", "ot", string) # change 't to not, e.g., don't -> donot
+  string <- gsub("'[a-z]+? ", " ", string) # remove 's, 'll and similar
+  string <- rm_url(string) # remove url
+  string <- gsub("[[:punct:]\n\r]", " ", string) # remove punctuation
+  string <- gsub(" [0-9]+", " ", string) # remove numbers
+  string <- gsub("\\s+", " ", string) # remove all extra white space
+  return(string  %>% tolower() %>% trimws())
+}
 ```
 
 ## commits
@@ -40,8 +53,9 @@ rownames(summary_ly)<-c("Min","1st Qu","Median","Mean","3rd Qu","Max")
 summary<-cbind(summary_gg,summary_ly,summary_gg_short)
 colnames(summary)<-c("ggplot2","plotly","ggplot2_comparable")
 summary
-
-
+```
+From the summary of message length that we calculate, the mean of message length for "ggplot2" is higher than that of "plotly". For the median, "ggplot2" is still higher than "plotly". In order to compare clearly, we constrict the comparing time period to "2014-present". It shows that although "plotly" was created, users are always willing to use "ggplot2". "ggplot2" was still popular.     
+```{r}
 commits_gg <- commits_gg %>%
   mutate(message_string=sapply(message, clean_string)) %>%
   mutate(message_split=strsplit(message_string," ")) %>% 
@@ -58,14 +72,16 @@ commits_gg_short <- commits_gg_short %>%
   mutate(message_length=sapply(message_split, length))
 
 #ridge line plot for two packages use the length<=75
-commits_ggly<-rbind(commits_ly %>% filter(message_length<=75),commits_gg_short %>% filter(message_length<=75))
+commits_ggly<-rbind(commits_ly %>% filter(message_length<=75), commits_gg_short %>% filter(message_length<=75))
 ggplot(commits_ggly, aes(x=message_length, y=repo, fill = factor(stat(quantile)))) +
   stat_density_ridges(
     geom = "density_ridges_gradient", calc_ecdf = TRUE,
     quantiles = 4, quantile_lines = TRUE
   ) +
   scale_fill_viridis_d(name = "Quartiles")
-
+```
+From the ridgeline plot, the distribution of these two packages is quite similar but "plotly.R" has a sharper peak and "ggplot2" has a longer tail. 
+```{r}
 # drop top 10% of the message length
 commit_message_len_first_90_perc_gg <- commits_gg %>% 
   arrange(message_length) %>% 
@@ -95,8 +111,7 @@ split_table_ly <- commit_message_len_first_90_perc_ly %>% select(message_split) 
 library(wordcloud2)
 wordcloud2(split_table_gg %>% filter(Freq>1))
 ```
-From the summary of message length that we calculate, the mean of message length for "ggplot2" is higher than that of "plotly". For the median, "ggplot2" is still higher than "plotly". In order to compare clearly, we constrict the comparing time period to "2014-present". It shows that although "plotly" was created, users are always willing to use "ggplot2". "ggplot2" was still popular.     
-From the ridgeline plot, the distribution of these two packages is quite similar but "plotly.R" has a sharper peak and "ggplot2" has a longer tail.  
+
 From the word cloud, for "ggplot2", we can see the most frequent word appeared is "fix". For "plotly", we can see the most frequent work appeared is "merge", "fix" and "plotly", "add" and "pull".
 
 ```{r}
@@ -223,7 +238,7 @@ issue %>%
 ```
 ## pull requests
 ```{r}
-pull <- read_csv("resources/data/pull_requests.csv") %>% filter(year(created_at) >= 2014)
+pull <- read_csv("resources/data/pull_requests.csv") 
 pull %>% 
   select(repo, author_association, created_at) %>%
   mutate(created_year=year(created_at) - 2000) %>%
@@ -236,5 +251,29 @@ pull %>%
   scale_x_continuous(breaks = 9:21) +
   labs(x = "created at (year)", y = "number of pull requests",
        title = "Number of pull requests created from 2014 to 2021")
+```
+```{r}
+# pull per weekday
+pull %>% 
+  select(repo, created_at, author_association) %>%
+  mutate(created_wday=wday(created_at, label = TRUE)) %>%
+  group_by(repo, author_association, created_wday) %>%
+  count(name="number") %>%
+  ggplot(aes(x = created_wday, y = number)) +
+  geom_col() +
+  facet_grid(author_association~repo) +
+  labs(x = "created at (weekday)", y = "number of issues",
+       title = "Number of pull created per weekday")
+```
+
+```{r}
+pull %>% 
+  select(created_at, updated_at, closed_at, repo, author_association, state) %>%
+  filter(state=="closed") %>% 
+  mutate(solveTime1 = interval(created_at, closed_at) / days(1),
+         created_year = year(created_at)) %>%
+  ggplot(aes(x = as.factor(created_year), y = solveTime1)) +
+  geom_boxplot() +
+  facet_wrap(~repo)
 ```
 
