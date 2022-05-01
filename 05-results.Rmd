@@ -7,8 +7,9 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.align =
 ```{r}
 library(ggridges)
 library(lubridate)
-library(stringi)
 library(tidyverse)
+library(gridExtra)
+library(hrbrthemes)
 ```
 
 ## Quantity Pattern
@@ -19,7 +20,7 @@ issue <- read_csv("resources/data/issues.csv")
 pull <- read_csv("resources/data/pull_requests.csv")
 ```
 
-```{r}
+```{r, fig.height=10}
 #bar plot 
 g1<-commits %>%
   select(date,repo) %>%
@@ -54,15 +55,13 @@ g3<-pull %>%
   facet_grid(~repo) +
   labs(x = "created at (weekday)", y = "number of pull request",
        title = "Number of pull request created per weekday")
-
-library(gridExtra)
-grid.arrange(g2,g3,g1,ncol=2)
+grid.arrange(g2,g3,g1,ncol=1)
 ```
 
 From the overview, we can find a significant difference in numbers between weekdays and weekend. Users of Github prefer to create pull requests, issues and commits during weekdays rather than weekends. When comparing these two packages, the number of all pull requests, issues and commits are smaller than ggplot2. And there is a great gap for the number of pull requests in these two packages.
 
 
-```{r}
+```{r, fig.height=10}
 commits$date<-as.Date(commits$date)
 g4<-commits %>%
   select(repo,date) %>%
@@ -101,7 +100,7 @@ g6<-pull %>%
   labs(x = "created at (year)", y = "number of pull",
        title = "Number of pull request")
 library(gridExtra)
-grid.arrange(g5,g6,g4,ncol=2)
+grid.arrange(g5,g6,g4,ncol=1)
 ```
 
 The data avalible for plotly is from 2014. For plotly, the number of issues and commits first increases and then has a decreasing trend after 2016. And for number of pull request of plotly, it has a decreasing trend. For ggplot2, the number of issues, pull requests and commits have a fluctuate process. In the first two years, the number of these three parts is increasing and for the last four years, especially after the pandemic, the number of these three parts has a decreasing trend. In particular, the number of commits for ggplot2 has a significant period fluctuation during time. Besides, after 2018, plotly is in the decreasing trend, which is partly due to the pandemic.
@@ -177,4 +176,81 @@ grid.arrange(g9,g10,ncol=1)
 ```
 
 Both packages have similar distribution shape for all author associations and they all have long right tail. And there is a small peak for comments equal to 10 for plotly. Comparing two packages, ggplot2 is more likely to have a heavy tail.
+
+```{r}
+issue_and_pull_request <- bind_rows(issue %>% mutate(category = "issue"), pull %>% mutate(category = "pull_request"))
+issue_and_pull_request %>% 
+  count(repo, category, state, name = "count") %>% 
+  ggplot(aes(x = state, y = count, fill = repo, label = count)) + 
+  geom_col(position = "dodge") + 
+  geom_text(position = position_dodge(width = 1), vjust = -0.5) +
+  facet_wrap(~category)
+```
+
+
+```{r}
+bar_after_cut <- function(tibble, time.period, time.labels){
+  tibble %>%
+    select(created_at, closed_at, repo, author_association, state, repo, category) %>%
+    filter(state=="closed") %>% 
+    mutate(solve.time = interval(created_at, closed_at) / days(1),
+           solve.period = cut(solve.time, breaks=time.period, labels=time.labels)) %>%
+    count(category, repo, solve.period, name = "count") %>%
+    group_by(category, repo) %>% 
+    mutate(perc = count / sum(count)) %>%
+    filter(! is.na(solve.period)) %>%
+    ggplot(aes(x = solve.period, y = perc, fill = repo)) +
+    geom_col(position="dodge") +
+    facet_wrap(~category, ncol = 1)
+}
+heatmap_after_cut <- function(tibble, time.period, time.labels){
+  tibble %>%
+    select(created_at, closed_at, repo, author_association, state, repo) %>%
+    filter(state=="closed") %>% 
+    mutate(solve.time = interval(created_at, closed_at) / days(1),
+           solve.period = cut(solve.time, breaks=time.period, labels=time.labels),
+           created.year = (year(created_at) - 2000) %>% as.factor()) %>%
+    count(repo, created.year, solve.period, name = "count") %>%
+    group_by(repo, created.year) %>% 
+    mutate(perc = count / sum(count)) %>%
+    filter(! is.na(solve.period)) %>%
+    ggplot(aes(x = created.year, y = solve.period, fill = perc)) +
+    geom_tile() +
+    scale_fill_gradient(low="white", high="blue") +
+    facet_wrap(~repo) 
+}
+time.period <- c(0, seq(30, 360, 30), 2000)
+time.labels <- c(sapply(1:12, function(x){paste("<", x, " month", sep="")}), ">1 year")
+bar_after_cut(issue_and_pull_request, time.period, time.labels)
+heatmap_after_cut(issue, time.period, time.labels)
+heatmap_after_cut(pull, time.period, time.labels)
+```
+
+
+```{r}
+time.period <- c(0, seq(3, 30, 3))
+time.labels <- sapply(seq(3, 30, 3), function(x){paste("<", x, "d", sep=" ")})
+bar_after_cut(issue_and_pull_request, time.period, time.labels)
+heatmap_after_cut(issue, time.period, time.labels)
+heatmap_after_cut(pull, time.period, time.labels)
+```
+
+```{r}
+time.period <- c(0, seq(0.5, 3, 0.5))
+time.labels <- sapply(seq(12, 72, 12), function(x){paste("<", x, " hour", sep="")})
+bar_after_cut(issue_and_pull_request, time.period, time.labels)
+heatmap_after_cut(issue, time.period, time.labels)
+heatmap_after_cut(pull, time.period, time.labels)
+```
+```{r}
+issue %>%
+  select(created_at, updated_at, repo, author_association, state, repo) %>%
+  filter(state=="open") %>% 
+  mutate(lastUpdate.sinceCreate = interval(created_at, updated_at) / days(1),
+         created.year = (year(created_at) - 2000) %>% as.factor()) %>%
+  ggplot(aes(x = created.year, y=  lastUpdate.sinceCreate)) +
+  geom_boxplot() +
+  facet_wrap(~repo)
+```
+
 
