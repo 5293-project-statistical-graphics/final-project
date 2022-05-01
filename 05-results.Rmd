@@ -8,128 +8,63 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.align =
 library(ggridges)
 library(lubridate)
 library(stringi)
-library(stopwords)
 library(tidyverse)
-library(qdapRegex)
-```
-```{r}
-# function used to clean commit messages and issue/pull request comments
-clean_string <- function(string){
-  string <- gsub("'t", "ot", string) # change 't to not, e.g., don't -> donot
-  string <- gsub("'[a-z]+? ", " ", string) # remove 's, 'll and similar
-  string <- rm_url(string) # remove url
-  string <- gsub("[[:punct:]\n\r]", " ", string) # remove punctuation
-  string <- gsub(" [0-9]+", " ", string) # remove numbers
-  string <- gsub("\\s+", " ", string) # remove all extra white space
-  return(string  %>% tolower() %>% trimws())
-}
 ```
 
-## commits
-We firstly focus on the message of commits. Each message can provide some information of the packages. We select the English content and drop the punctuation marks and stop words to do some pre-processing.
+## Quantity Pattern
+We firstly focus on the quantity pattern of these two packages. And then explore some rules for pandemic.
 ```{r}
 commits <- read_csv("resources/data/commits.csv")
-#separate the un-English content
-commits<-commits %>%
-  mutate(encoding_message=stri_enc_mark(message))
-
-commits <- commits %>%
-  filter(encoding_message=="ASCII")
-
-commits_gg<-commits %>%
-  filter(repo=="ggplot2")
-commits_gg_short<-commits %>%
-  filter(year(date)>= 2014 & repo=="ggplot2")
-commits_ly<-commits %>%
-  filter(repo=="plotly.R")
-
-#summary of message length
-summary_gg<-tibble(summary(nchar(commits_gg$message,type="bytes"), na.rm = T)) 
-rownames(summary_gg)<-c("Min","1st Qu","Median","Mean","3rd Qu","Max")
-summary_gg_short<-tibble(round(summary(nchar(commits_gg_short$message,type="bytes"), na.rm = T),2)) 
-rownames(summary_gg_short)<-c("Min","1st Qu","Median","Mean","3rd Qu","Max")
-summary_ly<-tibble(round(summary(nchar(commits_ly$message,type="bytes"), na.rm = T),2))
-rownames(summary_ly)<-c("Min","1st Qu","Median","Mean","3rd Qu","Max")
-summary<-cbind(summary_gg,summary_ly,summary_gg_short)
-colnames(summary)<-c("ggplot2","plotly","ggplot2_comparable")
-summary
+issue <- read_csv("resources/data/issues.csv")
+pull <- read_csv("resources/data/pull_requests.csv")
 ```
-From the summary of message length that we calculate, the mean of message length for "ggplot2" is higher than that of "plotly". For the median, "ggplot2" is still higher than "plotly". In order to compare clearly, we constrict the comparing time period to "2014-present". It shows that although "plotly" was created, users are always willing to use "ggplot2". "ggplot2" was still popular.     
-```{r}
-commits_gg <- commits_gg %>%
-  mutate(message_string=sapply(message, clean_string)) %>%
-  mutate(message_split=strsplit(message_string," ")) %>% 
-  mutate(message_length=sapply(message_split, length))
-
-commits_ly <- commits_ly %>%
-  mutate(message_string=sapply(message, clean_string)) %>%
-  mutate(message_split=strsplit(message_string," ")) %>% 
-  mutate(message_length=sapply(message_split, length))
-
-commits_gg_short <- commits_gg_short %>%
-  mutate(message_string=sapply(message, clean_string)) %>%
-  mutate(message_split=strsplit(message_string," ")) %>% 
-  mutate(message_length=sapply(message_split, length))
-
-#ridge line plot for two packages use the length<=75
-commits_ggly<-rbind(commits_ly %>% filter(message_length<=75), commits_gg_short %>% filter(message_length<=75))
-ggplot(commits_ggly, aes(x=message_length, y=repo, fill = factor(stat(quantile)))) +
-  stat_density_ridges(
-    geom = "density_ridges_gradient", calc_ecdf = TRUE,
-    quantiles = 4, quantile_lines = TRUE
-  ) +
-  scale_fill_viridis_d(name = "Quartiles")
-```
-From the ridgeline plot, the distribution of these two packages is quite similar but "plotly.R" has a sharper peak and "ggplot2" has a longer tail. 
-```{r}
-# drop top 10% of the message length
-commit_message_len_first_90_perc_gg <- commits_gg %>% 
-  arrange(message_length) %>% 
-  mutate(rank = row_number(message_length)) %>%
-  filter(rank < 0.90 * nrow(commits))
-
-commit_message_len_first_90_perc_ly <- commits_ly %>% 
-  arrange(message_length) %>% 
-  mutate(rank = row_number(message_length)) %>%
-  filter(rank < 0.90 * nrow(commits))
-
-#frequency of each word
-split_table_gg <- commit_message_len_first_90_perc_gg %>% select(message_split) %>%
-  unnest(message_split) %>%
-  group_by(message_split) %>%
-  count(name = "Freq") %>%
-  filter(! message_split %in% stopwords("en", source = "snowball")) %>%
-  arrange(desc(Freq))
-
-split_table_ly <- commit_message_len_first_90_perc_ly %>% select(message_split) %>%
-  unnest(message_split) %>%
-  group_by(message_split) %>%
-  count(name = "Freq") %>%
-  filter(! message_split %in% stopwords("en", source = "snowball")) %>%
-  arrange(desc(Freq))
-#word cloud
-library(wordcloud2)
-wordcloud2(split_table_gg %>% filter(Freq>1))
-```
-
-From the word cloud, for "ggplot2", we can see the most frequent word appeared is "fix". For "plotly", we can see the most frequent work appeared is "merge", "fix" and "plotly", "add" and "pull".
 
 ```{r}
-#bar plot for message length
-commits_ggly$date<-as.Date(commits_ggly$date)
-commits_ggly<-commits_ggly %>%mutate(weekday=weekdays.Date(date)) 
-commits_ggly$weekday<-factor(commits_ggly$weekday,levels=c("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"))
-commits_ggly %>%
-  ggplot(aes(x=weekday))+
-  geom_bar(stat="count")+
-  facet_wrap(~repo)
+#bar plot 
+g1<-commits %>%
+  select(date,repo) %>%
+  mutate(created_wday=wday(date,label=T)) %>%
+  group_by(repo,created_wday) %>%
+  count(name="number") %>%
+  ggplot(aes(x=created_wday,y=number))+
+  geom_col()+
+  facet_wrap(~repo)+
+    labs(x = "created at (weekday)", y = "number of commits",
+       title = "Number of commits created per weekday")
+# issue per weekday
+g2<-issue %>% 
+  select(repo, created_at, author_association) %>%
+  mutate(created_wday=wday(created_at, label = TRUE)) %>%
+  group_by(repo, author_association, created_wday) %>%
+  count(name="number") %>%
+  ggplot(aes(x = created_wday, y = number)) +
+  geom_col() +
+  facet_grid(~repo) +
+  labs(x = "created at (weekday)", y = "number of issues",
+       title = "Number of issues created per weekday")
+
+# pull per weekday
+g3<-pull %>% 
+  select(repo, created_at, author_association) %>%
+  mutate(created_wday=wday(created_at, label = TRUE)) %>%
+  group_by(repo, author_association, created_wday) %>%
+  count(name="number") %>%
+  ggplot(aes(x = created_wday, y = number)) +
+  geom_col() +
+  facet_grid(~repo) +
+  labs(x = "created at (weekday)", y = "number of pull request",
+       title = "Number of pull request created per weekday")
+
+library(gridExtra)
+grid.arrange(g2,g3,g1,ncol=2)
 ```
 
-Most of the commits made during weekdays but not the weekend. When comparing two packages, the overall commits amount of plotly is higher than ggplot2.
+From the overview, we can find a significant difference in numbers between weekdays and weekend. Users of Github prefer to create pull requests, issues and commits during weekdays rather than weekends. When comparing these two packages, the number of all pull requests, issues and commits are smaller than ggplot2. And there is a great gap for the number of pull requests in these two packages.
+
 
 ```{r}
 commits$date<-as.Date(commits$date)
-commits %>%
+g4<-commits %>%
   select(repo,date) %>%
   mutate(year=year(date)-2000) %>%
   group_by(repo,year) %>%
@@ -137,19 +72,48 @@ commits %>%
   filter(year!=22) %>%
   ggplot(aes(x=year,y=number))+geom_line()+facet_wrap(~repo)+
   scale_x_continuous(breaks=7:21)+
-  labs(x="made at(year)",y="number of commits",title="Number of commits made from 2007 to 2021")
+  labs(x="created at(year)",y="number of commits",title="Number of commits")
+
+# issue per year
+g5<-issue %>% 
+  select(repo, created_at) %>%
+  mutate(created_year=year(created_at) - 2000) %>%
+  group_by(repo, created_year) %>%
+  count(name = "number") %>%
+  filter(created_year != 22)  %>%
+  ggplot(aes(x = created_year, y = number)) +
+  geom_line() +
+  facet_wrap(~repo) +
+  scale_x_continuous(breaks = 9:21) +
+  labs(x = "created at (year)", y = "number of issues",
+       title = "Number of issues")
+
+g6<-pull %>% 
+  select(repo, created_at) %>%
+  mutate(created_year=year(created_at) - 2000) %>%
+  group_by(repo, created_year) %>%
+  count(name = "number") %>%
+  filter(created_year != 22)  %>%
+  ggplot(aes(x = created_year, y = number)) +
+  geom_line() +
+  facet_wrap(~repo) +
+  scale_x_continuous(breaks = 9:21) +
+  labs(x = "created at (year)", y = "number of pull",
+       title = "Number of pull request")
+library(gridExtra)
+grid.arrange(g5,g6,g4,ncol=2)
 ```
 
-The number of commits made fluctuates during time. And for ggplot2, the period of fluctuation is about 3 or 4 years. When plotly was created, there is a huge increase on the number of commits made. And the same situation can be seen in ggplot2. And after 2018, the number of commits for these two packages are decreasing.
+The data avalible for plotly is from 2014. For plotly, the number of issues and commits first increases and then has a decreasing trend after 2016. And for number of pull request of plotly, it has a decreasing trend. For ggplot2, the number of issues, pull requests and commits have a fluctuate process. In the first two years, the number of these three parts is increasing and for the last four years, especially after the pandemic, the number of these three parts has a decreasing trend. In particular, the number of commits for ggplot2 has a significant period fluctuation during time. Besides, after 2018, plotly is in the decreasing trend, which is partly due to the pandemic.
 
-## issue
-Issue is the key part where users and developers interact with each other. The number of issues can somewhat show the popularity of a package.
 ```{r}
-issue <- read_csv("resources/data/issues.csv") %>% filter(year(created_at) >= 2014)
-# issue per year
-issue %>% 
+g7<-issue %>% 
   select(repo, author_association, created_at) %>%
   mutate(created_year=year(created_at) - 2000) %>%
+  mutate(author_association=case_when(author_association=="COLLABORATOR"~"MEMBER",
+                                      author_association=="CONTRIBUTOR"~"CONTRIBUTOR",
+                                      author_association=="MEMBER"~"MEMBER",
+                                      author_association=="NONE"~"NONE")) %>%
   group_by(repo, author_association, created_year) %>%
   count(name = "number") %>%
   filter(created_year != 22)  %>%
@@ -158,90 +122,14 @@ issue %>%
   facet_wrap(~repo) +
   scale_x_continuous(breaks = 9:21) +
   labs(x = "created at (year)", y = "number of issues",
-       title = "Number of issues created from 2014 to 2021")
-```
-
-```{r}
-# issue per weekday
-issue %>% 
-  select(repo, created_at, author_association) %>%
-  mutate(created_wday=wday(created_at, label = TRUE)) %>%
-  group_by(repo, author_association, created_wday) %>%
-  count(name="number") %>%
-  ggplot(aes(x = created_wday, y = number)) +
-  geom_col() +
-  facet_grid(author_association~repo) +
-  labs(x = "created at (weekday)", y = "number of issues",
-       title = "Number of issues created per weekday")
-```
-
-issues that remains open, how long has passed since last update, how long has passed between created and last update
-```{r}
-open_issue <- issue %>% 
-  select(created_at, updated_at, repo, state) %>%
-  filter(state=="open") %>% 
-  mutate(lastUpdateSinceCreated = interval(created_at, updated_at) / days(1),
-         sinceLastUpdate = interval(created_at, now()) / days(1)) %>%
-  pivot_longer(cols = c(lastUpdateSinceCreated, sinceLastUpdate), names_to = "category", values_to = "days")
-
-ggplot(open_issue, aes(x=repo, y=days)) + 
-  geom_boxplot() +
-  facet_wrap(~category)
-
-ggplot(open_issue, aes(x=days, y=repo)) +
-  geom_density_ridges() +
-  theme_ridges() +
-  facet_wrap(~category)
-
-
-```
-issues that is closed tooks how long to solve, and is there any correlation between solve time and comments number
-```{r}
-issue %>% 
-  select(created_at, updated_at, closed_at, repo, author_association, state) %>%
-  filter(state=="closed") %>% 
-  mutate(solveTime1 = interval(created_at, closed_at) / days(1),
-         solveTime2 = interval(created_at, updated_at) / days(1)) %>%
-  ggplot(aes(x = repo, y = solveTime2)) +
-  geom_boxplot() +
-  facet_wrap(~author_association)
-```
-
-
-```{r}
-issue %>%
-  group_by(repo, author_association) %>%
-  count(name="number") %>%
-  ggplot(aes(x = author_association, y = number, fill = repo)) +
-  geom_col(position="dodge")
-issue %>% 
-  filter(state=="closed") %>%
-  select(repo, comments, author_association) %>%
-  filter(comments <= 15) %>%
-  ggplot(aes(x = repo, y = comments)) +
-  geom_boxplot() +
-  facet_wrap(~author_association)
-```
-
-
-```{r}
-issue %>% 
-  select(repo, comments, author_association) %>%
-  filter(comments < 15) %>%
-  ggplot(aes(x = comments, y = repo, fill = stat(quantile))) +
-  stat_density_ridges(quantile_lines = FALSE, calc_ecdf = TRUE, bandwidth = 1,
-                      geom = "density_ridges_gradient") +
-  facet_wrap(~author_association) +
-  scale_fill_brewer(name = "quantile", labels = c("1st", "2nd", "3rd", "4th")) + 
-  theme_ridges()
-    
-```
-## pull requests
-```{r}
-pull <- read_csv("resources/data/pull_requests.csv") 
-pull %>% 
+       title = "Number of issues created")
+g8<-pull %>% 
   select(repo, author_association, created_at) %>%
   mutate(created_year=year(created_at) - 2000) %>%
+  mutate(author_association=case_when(author_association=="COLLABORATOR"~"MEMBER",
+                                      author_association=="CONTRIBUTOR"~"CONTRIBUTOR",
+                                      author_association=="MEMBER"~"MEMBER",
+                                      author_association=="NONE"~"NONE")) %>%
   group_by(repo, author_association, created_year) %>%
   count(name = "number") %>%
   filter(created_year != 22)  %>%
@@ -250,30 +138,43 @@ pull %>%
   facet_wrap(~repo) +
   scale_x_continuous(breaks = 9:21) +
   labs(x = "created at (year)", y = "number of pull requests",
-       title = "Number of pull requests created from 2014 to 2021")
-```
-```{r}
-# pull per weekday
-pull %>% 
-  select(repo, created_at, author_association) %>%
-  mutate(created_wday=wday(created_at, label = TRUE)) %>%
-  group_by(repo, author_association, created_wday) %>%
-  count(name="number") %>%
-  ggplot(aes(x = created_wday, y = number)) +
-  geom_col() +
-  facet_grid(author_association~repo) +
-  labs(x = "created at (weekday)", y = "number of issues",
-       title = "Number of pull created per weekday")
+       title = "Number of pull requests created")
+grid.arrange(g7,g8,ncol=1)
 ```
 
+When we look into the author association for pull requests and issues, we can draw more analysis conclusions. Due to the same meaning in the definition of "COLLABORATOR" and "MEMBER" in these two packages, we combine these two classes into "MEMBER". When comparing issues and pull requests, "NONE" have created more issues than any other author associations during time. But for pull requests, "MEMBER" dominates mostly and "NONE" is in the low position in the plot. From 2020, partly due to pandemic, the number for both issues and pull requests, of all author associations, for both packages decreases.
+
+
 ```{r}
-pull %>% 
-  select(created_at, updated_at, closed_at, repo, author_association, state) %>%
-  filter(state=="closed") %>% 
-  mutate(solveTime1 = interval(created_at, closed_at) / days(1),
-         created_year = year(created_at)) %>%
-  ggplot(aes(x = as.factor(created_year), y = solveTime1)) +
-  geom_boxplot() +
-  facet_wrap(~repo)
+g9<-issue %>% 
+  select(repo, comments, author_association) %>%
+  mutate(author_association=case_when(author_association=="COLLABORATOR"~"MEMBER",
+                                      author_association=="CONTRIBUTOR"~"CONTRIBUTOR",
+                                      author_association=="MEMBER"~"MEMBER",
+                                      author_association=="NONE"~"NONE"))%>%
+  filter(comments < 15) %>%
+  ggplot(aes(x = comments, y = repo, fill = stat(quantile))) +
+  stat_density_ridges(quantile_lines = FALSE, calc_ecdf = TRUE, bandwidth = 1,
+                      geom = "density_ridges_gradient") +
+  facet_wrap(~author_association) +
+  scale_fill_brewer(name = "quantile", labels = c("1st", "2nd", "3rd", "4th")) + 
+  theme_ridges()
+
+g10<-pull %>% 
+  select(repo, comments, author_association) %>%
+  mutate(author_association=case_when(author_association=="COLLABORATOR"~"MEMBER",
+                                      author_association=="CONTRIBUTOR"~"CONTRIBUTOR",
+                                      author_association=="MEMBER"~"MEMBER",
+                                      author_association=="NONE"~"NONE"))%>%
+  filter(comments < 15) %>%
+  ggplot(aes(x = comments, y = repo, fill = stat(quantile))) +
+  stat_density_ridges(quantile_lines = FALSE, calc_ecdf = TRUE, bandwidth = 1,
+                      geom = "density_ridges_gradient") +
+  facet_wrap(~author_association) +
+  scale_fill_brewer(name = "quantile", labels = c("1st", "2nd", "3rd", "4th")) + 
+  theme_ridges()
+grid.arrange(g9,g10,ncol=1)
 ```
+
+Both packages have similar distribution shape for all author associations and they all have long right tail. And there is a small peak for comments equal to 10 for plotly. Comparing two packages, ggplot2 is more likely to have a heavy tail.
 
