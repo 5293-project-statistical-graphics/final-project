@@ -1,96 +1,74 @@
 # Data transformation
 
-The raw data comes in json format. We simply extracted desired properties from each entries and put them in a tibble.
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+The raw data comes in json format. We simply extracted desired properties from json and store them in a csv file. Since issue API does not allow us to crawl data prior a specific time, we will also remove issue and pull request created after 2022.
 ```{r}
 library(tidyverse)
+library(lubridate)
 library(jsonlite)
 ```
 
-
+The following function extracts several properties from commit raw data.
 ```{r}
+clean_commits <- function(raw.commits, repo){
+  clean.commits <- tibble(commit_info = raw.commits) %>%
+    mutate(
+      author = sapply(commit_info, function(x){x$author$login}),
+      date = sapply(commit_info, function(x){x$commit$author$date}),
+      message = sapply(commit_info, function(x){x$commit$message}),
+      url = sapply(commit_info, function(x){x$html_url}),
+      repo = repo) %>%
+    select(-commit_info) %>% unnest(author)
+  return(clean.commits)
+}
 commit.ggplot.raw <- read_json(path = "resources/rawdata/ggplot2_commits.json")
-commit.ggplot <- tibble(commit_info = commit.ggplot.raw) %>%
-  mutate(
-    author = sapply(commit_info, function(x){x$author$login}),
-    date = sapply(commit_info, function(x){x$commit$author$date}),
-    message = sapply(commit_info, function(x){x$commit$message}),
-    url = sapply(commit_info, function(x){x$html_url}),
-    repo = "ggplot2"
-    ) %>% 
-  select(-commit_info) %>% unnest(author)
+commit.ggplot <- clean_commits(commit.ggplot.raw, "ggplot2")
 
 commit.plotly.raw <- read_json(path = "resources/rawdata/plotly.R_commits.json")
-commit.plotly <- tibble(commit_info = commit.plotly.raw) %>%
-  mutate(
-    author = sapply(commit_info, function(x){x$author$login}),
-    date = sapply(commit_info, function(x){x$commit$author$date}),
-    message = sapply(commit_info, function(x){x$commit$message}),
-    url = sapply(commit_info, function(x){x$html_url}),
-    repo = "plotly.R"
-    ) %>% 
-  select(-commit_info) %>% unnest(author)
+commit.plotly <- clean_commits(commit.plotly.raw, "plotly")
 ### not run
-#bind_rows(commit.ggplot, commit.plotly) %>% write_csv("resources/data/commits.csv")
+# bind_rows(commit.ggplot, commit.plotly) %>% write_csv("resources/data/commits.csv")
 ### END not run
 ```
-In previous chapter, we mentioned that the issue API will return both issues and pull requests. Therefore, we will need to differentiate them between each other and store them in separate tibble. And the main difference between issues and pull requests is that pull request entries have a "pull request" property.
+In previous chapter, we mentioned that the issue API will return both issues and pull requests. Therefore, we will need to differentiate them between each other and store them in separate tibble. And the main difference between issues and pull requests is that pull request entries have a "pull request" key. The following function will extracts several properties from issues raw data and mark each record issue or pull request.
 ```{r}
+clean_issues <- function(raw.issues, repo){
+  clean.issues <- tibble(issue_info = raw.issues) %>%
+    mutate(
+      author = sapply(issue_info, function(x){x$user$login}),
+      author_association = sapply(issue_info, function(x){x$author_association}),
+      state = sapply(issue_info, function(x){x$state}),
+      comments = sapply(issue_info, function(x){x$comments}),
+      pull_request = sapply(issue_info, function(x){length(x$pull_request$html_url)}), 
+      created_at = sapply(issue_info, function(x){x$created_at}),
+      updated_at = sapply(issue_info, function(x){x$updated_at}),
+      closed_at = sapply(issue_info, function(x){x$closed_at}) %>% as.character(),
+      title = sapply(issue_info, function(x){x$title}),
+      body = sapply(issue_info, function(x){x$body}) %>% as.character(),
+      url = sapply(issue_info, function(x){x$html_url}), 
+      repo = repo) %>%
+    filter(year(created_at) != 2022) %>%
+    select(-c(issue_info)) %>%
+    unnest(c(closed_at, body)) %>%
+    mutate(closed_at = ifelse(closed_at == "list()", NA, closed_at)) 
+  return(clean.issues)
+}
+
 issues.ggplot.raw <- read_json(path = "resources/rawdata/ggplot2_issues.json")
-issues.ggplot <- tibble(issue_info = issues.ggplot.raw) %>%
-  mutate(
-    author = sapply(issue_info, function(x){x$user$login}),
-    author_association = sapply(issue_info, function(x){x$author_association}),
-    state = sapply(issue_info, function(x){x$state}),
-    comments = sapply(issue_info, function(x){x$comments}),
-    pull_request = sapply(issue_info, function(x){x$pull_request$html_url}),
-    created_at = sapply(issue_info, function(x){x$created_at}),
-    updated_at = sapply(issue_info, function(x){x$updated_at}),
-    closed_at = sapply(issue_info, function(x){x$closed_at}) %>% as.character(),
-    title = sapply(issue_info, function(x){x$title}),
-    body = sapply(issue_info, function(x){x$body}) %>% as.character(),
-    url = sapply(issue_info, function(x){x$html_url}),
-    repo = "ggplot2"
-    ) %>%
-  select(-issue_info)
-pull_request.ggplot <- issues.ggplot %>% 
-  filter(sapply(pull_request, length) != 0) %>% 
-  unnest(c(pull_request, closed_at, body)) %>%
-  mutate(closed_at = ifelse(closed_at == "list()", NA, closed_at))
-issues.ggplot <- issues.ggplot %>%
-  filter(sapply(pull_request, length) == 0) %>% 
-  select(-pull_request) %>%
-  unnest(c(closed_at, body)) %>%
-  mutate(closed_at = ifelse(closed_at == "list()", NA, closed_at))
+issues.ggplot <- clean_issues(issues.ggplot.raw, "ggplot2")
+pull_requests.ggplot <- issues.ggplot %>% filter(pull_request != 0) %>% select(-pull_request)
+issues.ggplot <- issues.ggplot %>% filter(pull_request != 1) %>% select(-pull_request)
 
 issues.plotly.raw <- read_json(path = "resources/rawdata/plotly.R_issues.json")
-issues.plotly <- tibble(issue_info = issues.plotly.raw) %>%
-  mutate(
-    author = sapply(issue_info, function(x){x$user$login}),
-    author_association = sapply(issue_info, function(x){x$author_association}),
-    state = sapply(issue_info, function(x){x$state}),
-    comments = sapply(issue_info, function(x){x$comments}),
-    pull_request = sapply(issue_info, function(x){x$pull_request$html_url}),
-    created_at = sapply(issue_info, function(x){x$created_at}),
-    updated_at = sapply(issue_info, function(x){x$updated_at}),
-    closed_at = sapply(issue_info, function(x){x$closed_at}) %>% as.character(),
-    body = sapply(issue_info, function(x){x$body}) %>% as.character(),
-    url = sapply(issue_info, function(x){x$html_url}),
-    repo = "plotly"
-  ) %>%
-  select(-issue_info)
-pull_request.plotly <- issues.plotly %>% 
-  filter(sapply(pull_request, length) != 0) %>% 
-  unnest(c(pull_request, closed_at, body)) %>%
-  mutate(closed_at = ifelse(closed_at == "list()", NA, closed_at))
-issues.plotly <- issues.plotly %>%
-  filter(sapply(pull_request, length) == 0) %>% 
-  select(-pull_request) %>%
-  unnest(c(closed_at, body)) %>%
-  mutate(closed_at = ifelse(closed_at == "list()", NA, closed_at))
-
+issues.plotly <- clean_issues(issues.plotly.raw, "plotly")
+pull_requests.plotly <- issues.plotly %>% filter(pull_request != 0) %>% select(-pull_request)
+issues.plotly <- issues.plotly %>% filter(pull_request != 1) %>% select(-pull_request)
 # not run
 # bind_rows(issues.ggplot, issues.plotly) %>% write_csv("resources/data/issues.csv")
-# bind_rows(pull_request.ggplot, pull_request.plotly) %>% write_csv("resources/data/pull_requests.csv")
+# bind_rows(pull_requests.ggplot, pull_requests.plotly) %>% write_csv("resources/data/pull_requests.csv")
 ### END not run
 ```
 All the transformed data are stored under [resources/data](https://github.com/5293-project-statistical-graphics/final-project/tree/main/resources/data){target="_blank} folder.
