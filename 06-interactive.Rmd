@@ -1,3 +1,108 @@
 # Interactive component
 
+```{r, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, fig.align = "center")
+``` 
+
+```{r}
+library(plotly)
+library(lubridate)
+library(tidyverse)
+library(gganimate)
+library(hrbrthemes)
+```
+
+```{r}
+accumulate_by <- function(dat, var) {
+  var <- lazyeval::f_eval(var, dat)
+  lvls <- plotly:::getLevels(var)
+  dats <- lapply(seq_along(lvls), function(x) {
+    cbind(dat[var %in% lvls[seq(1, x)], ], frame = lvls[[x]])
+  })
+  dplyr::bind_rows(dats)
+}
+mutate_data <- function(tibble, label){
+  tibble %>%
+    filter(year(date) >= 2014) %>% 
+    mutate(year = year(date), date = year(date) + (month(date) - 1) / 12, label = label)  %>%
+    count(date, repo, label) %>%
+    pivot_wider(names_from = label, values_from = n)
+}
+commit <- read_csv("resources/data/commits.csv")
+issue <- read_csv("resources/data/issues.csv")  
+pull <- read_csv("resources/data/pull_requests.csv")  
+
+data <- tibble(date = rep(seq(2014, 2022 - 1/12, 1/12), 2), 
+               repo = rep(c("ggplot2", "plotly"), each = 96)) %>%
+  full_join(mutate_data(commit, "commit")) %>%
+  full_join(mutate_data(issue %>% rename(date = created_at), "issue")) %>%
+  full_join(mutate_data(pull %>% rename(date = created_at), "pull_request")) %>%
+  replace_na(list(commit = 0, issue = 0, pull_request = 0))
+```
+
+```{r}
+data %>% 
+  pivot_longer(cols = c(commit, issue, pull_request), names_to = "category") %>%
+  ggplot(aes(x = date, y = value, color = repo)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~category, ncol = 1, scale = "free_y") +
+  theme_ipsum() +
+  transition_reveal(date)
+```
+
+```{r}
+data <- tibble(date = rep(seq(2014, 2022 - 1/12, 1/12), 2), 
+               repo = rep(c("ggplot2", "plotly"), each = 96)) %>%
+  full_join(mutate_data(commit, "commit")) %>%
+  full_join(mutate_data(issue %>% rename(date = created_at), "issue")) %>%
+  full_join(mutate_data(pull %>% rename(date = created_at), "pull_request")) %>%
+  replace_na(list(commit = 0, issue = 0, pull_request = 0))
+
+updatemenus <- list(
+  list(
+    active = 0,
+    type=  "buttons",
+    buttons = list(
+      list(
+        label = "commit",
+        method = "update",
+        args = list(list(visible = c(FALSE, FALSE, TRUE, TRUE, FALSE, FALSE)))
+        ),
+      list(
+        label = "issue",
+        method = "update",
+        args = list(list(visible = c(FALSE, FALSE, FALSE, FALSE, TRUE, TRUE)))
+        ),
+      list(
+        label = "pull",
+        method = "update",
+        args = list(list(visible = c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE)))
+        )
+    )
+  )
+)
+
+fig <- data %>%
+  plot_ly(
+    split = ~repo,
+    type = 'scatter',
+    mode = 'lines'
+  )
+fig <- fig %>% add_lines(x = ~date, y = ~commit)
+fig <- fig %>% add_lines(x = ~date, y = ~issue, visible = FALSE)
+fig <- fig %>% add_lines(x = ~date, y = ~pull_request, visible = FALSE)
+fig <- fig %>% layout(
+  xaxis = list(
+    title = "Date",
+    zeroline = F
+  ),
+  yaxis = list(
+    title = "count",
+    zeroline = F
+  ),
+  updatemenus = updatemenus
+) 
+fig
+```
 
