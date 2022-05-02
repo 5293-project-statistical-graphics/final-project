@@ -3,7 +3,6 @@ data-sources
 data-transformation
 missing-values
 results
-issue-comments
-pull-request-comments
+quantity-pattern
 interactive-component
 conclusion

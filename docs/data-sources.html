@@ -23,7 +23,7 @@
 <meta name="author" content="Yujie Tu, Yuchen Meng" />
 
 
-<meta name="date" content="2022-04-26" />
+<meta name="date" content="2022-05-01" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -142,8 +142,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="4" data-path="missing-values.html"><a href="missing-values.html"><i class="fa fa-check"></i><b>4</b> Missing values<span></span></a></li>
 <li class="chapter" data-level="5" data-path="results.html"><a href="results.html"><i class="fa fa-check"></i><b>5</b> Results<span></span></a>
 <ul>
-<li class="chapter" data-level="5.1" data-path="results.html"><a href="results.html#issue-comments"><i class="fa fa-check"></i><b>5.1</b> issue comments<span></span></a></li>
-<li class="chapter" data-level="5.2" data-path="results.html"><a href="results.html#pull-request-comments"><i class="fa fa-check"></i><b>5.2</b> pull request comments<span></span></a></li>
+<li class="chapter" data-level="5.1" data-path="results.html"><a href="results.html#quantity-pattern"><i class="fa fa-check"></i><b>5.1</b> Quantity Pattern<span></span></a></li>
 </ul></li>
 <li class="chapter" data-level="6" data-path="interactive-component.html"><a href="interactive-component.html"><i class="fa fa-check"></i><b>6</b> Interactive component<span></span></a></li>
 <li class="chapter" data-level="7" data-path="conclusion.html"><a href="conclusion.html"><i class="fa fa-check"></i><b>7</b> Conclusion<span></span></a></li>
@@ -168,25 +167,37 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="data-sources" class="section level1 hasAnchor" number="2">
 <h1><span class="header-section-number">Chapter 2</span> Data sources<a href="data-sources.html#data-sources" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>Our data come from <a href="https://ghtorrent.org/" target="_blank">the GHTorrent Project</a>, which is “an effort to create a scalable, queriable, offline mirror of data offered through the Github REST API.” It includes the complete data up to 2019-06-30 (in the format of MySql dumps and MongoDB daily dumps). Due to our limited computing power, we choose to use only one day’s data (the raw data is about 23 gigabytes), <a href="http://ghtorrent-downloads.ewi.tudelft.nl/mongo-daily/mongo-dump-2019-06-30.tar.gz" target="_blank">2019-06-30</a>.</p>
-<p>The raw GHTorrent data consists of 16 tables and is stored in <a href="https://en.wikipedia.org/wiki/BSON" target="_blank">bson</a> format. The schema is provided under the resources/schema folder:</p>
-<pre><code>##  [1] &quot;commit_comments.txt&quot;       &quot;commits.txt&quot;               &quot;events.txt&quot;                &quot;forks.txt&quot;                 &quot;geo_cache.txt&quot;            
-##  [6] &quot;issue_comments.txt&quot;        &quot;issue_events.txt&quot;          &quot;issues.txt&quot;                &quot;org_members.txt&quot;           &quot;pull_request_comments.txt&quot;
-## [11] &quot;pull_requests.txt&quot;         &quot;repo_labels.txt&quot;           &quot;repos.txt&quot;                 &quot;topics.txt&quot;                &quot;users.txt&quot;                
-## [16] &quot;watchers.txt&quot;</code></pre>
-<p>And a typical schema file of the table includes three elements: the number of records, the schema of one record, and an example record:</p>
-<pre><code>## resources/schema/commits.txt: 
-##  Total records: 624376  
-##  Schema:  
-##  root:  
-##   |-- _id:   &lt;class &#39;bson.objectid.ObjectId&#39;&gt; 
-##   |-- sha:   &lt;class &#39;str&#39;&gt; 
-##   |-- node_id:   &lt;class &#39;str&#39;&gt; 
-##   |-- commit:     
-##        |-- author:    
-##             |-- name:    &lt;class &#39;str&#39;&gt; 
-##             |-- email:   &lt;class &#39;str&#39;&gt; 
-##  ...</code></pre>
+<p>We used GitHub REST API to crawl two popular R package’s repositories, ggplot2 and plotly and we will focus on the repositories main branche’ commits, issues and pull requests since these three components can provide some insights on the projects’ development progress and popularity changes over time. And we will restrict all the data to be prior to 2022 (commit time of a commit and created time of issue/pull request).</p>
+<p>The following function will crawl the “content” of <code>github.com/owner/repo</code> where “content” can be “commits” or “issues” (more info <a href="https://docs.github.com/en/rest" target="_blank">here</a>) Notice that issues API will return both issues and pull requests.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="data-sources.html#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># until.time only applies to commits</span></span>
+<span id="cb1-2"><a href="data-sources.html#cb1-2" aria-hidden="true" tabindex="-1"></a>until.time <span class="ot">&lt;-</span> <span class="st">&quot;2022-01-01T00:00:00Z&quot;</span></span>
+<span id="cb1-3"><a href="data-sources.html#cb1-3" aria-hidden="true" tabindex="-1"></a>crawler <span class="ot">&lt;-</span> <span class="cf">function</span>(owner, repo, content){</span>
+<span id="cb1-4"><a href="data-sources.html#cb1-4" aria-hidden="true" tabindex="-1"></a>  page <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb1-5"><a href="data-sources.html#cb1-5" aria-hidden="true" tabindex="-1"></a>  data.raw <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb1-6"><a href="data-sources.html#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Each dot represent 100 records.</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb1-7"><a href="data-sources.html#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span>(<span class="cn">TRUE</span>){</span>
+<span id="cb1-8"><a href="data-sources.html#cb1-8" aria-hidden="true" tabindex="-1"></a>    response <span class="ot">&lt;-</span> </span>
+<span id="cb1-9"><a href="data-sources.html#cb1-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">gh</span>(<span class="st">&quot;GET /repos/{owner}/{repo}/{content}&quot;</span>, <span class="at">owner =</span> owner, <span class="at">repo =</span> repo, </span>
+<span id="cb1-10"><a href="data-sources.html#cb1-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">content =</span> content, <span class="at">per_page =</span> <span class="dv">100</span>, <span class="at">page =</span> page, <span class="at">state =</span> <span class="st">&quot;all&quot;</span>, <span class="at">until =</span> until.time) </span>
+<span id="cb1-11"><a href="data-sources.html#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;.&quot;</span>)</span>
+<span id="cb1-12"><a href="data-sources.html#cb1-12" aria-hidden="true" tabindex="-1"></a>    data.raw <span class="ot">&lt;-</span> <span class="fu">c</span>(data.raw, response)</span>
+<span id="cb1-13"><a href="data-sources.html#cb1-13" aria-hidden="true" tabindex="-1"></a>    page <span class="ot">&lt;-</span> page <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb1-14"><a href="data-sources.html#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># when the returned data has less than 100 records, break the loop since all the record has been crawled</span></span>
+<span id="cb1-15"><a href="data-sources.html#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(response) <span class="sc">!=</span> <span class="dv">100</span>) <span class="cf">break</span></span>
+<span id="cb1-16"><a href="data-sources.html#cb1-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-17"><a href="data-sources.html#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb1-18"><a href="data-sources.html#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write_file</span>(<span class="fu">toJSON</span>(data.raw, <span class="at">pretty=</span><span class="cn">TRUE</span>, <span class="at">auto_unbox=</span><span class="cn">TRUE</span>), </span>
+<span id="cb1-19"><a href="data-sources.html#cb1-19" aria-hidden="true" tabindex="-1"></a>             <span class="at">file =</span> <span class="fu">paste</span>(<span class="st">&quot;resources/rawdata/&quot;</span>, repo, <span class="st">&quot;_&quot;</span>, content, <span class="st">&quot;.json&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>))</span>
+<span id="cb1-20"><a href="data-sources.html#cb1-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-21"><a href="data-sources.html#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="do">### not run</span></span>
+<span id="cb1-22"><a href="data-sources.html#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co"># code used to crawl commits and issues of ggplot2 and plotly</span></span>
+<span id="cb1-23"><a href="data-sources.html#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co"># crawler(owner = &quot;tidyverse&quot;, repo = &quot;ggplot2&quot;, content = &quot;commits&quot;)</span></span>
+<span id="cb1-24"><a href="data-sources.html#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co"># crawler(owner = &quot;plotly&quot;, repo = &quot;plotly.R&quot;, content = &quot;commits&quot;)</span></span>
+<span id="cb1-25"><a href="data-sources.html#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co"># crawler(owner = &quot;tidyverse&quot;, repo = &quot;ggplot2&quot;, content = &quot;issues&quot;)</span></span>
+<span id="cb1-26"><a href="data-sources.html#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co"># crawler(owner = &quot;plotly&quot;, repo = &quot;plotly.R&quot;, content = &quot;issues&quot;)</span></span>
+<span id="cb1-27"><a href="data-sources.html#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="do">### </span><span class="re">END</span><span class="do"> not run</span></span></code></pre></div>
+<p>Until 2022-01-01T00:00:00Z, ggplot2 has 4816 commits and plotly.R has 3848 commits. Until the last crawling, ggplot2 has 4823 issues and pull requests and plotly.R has 2126 .</p>
+<p>The raw data provide a lot of info about the commits, issues and pull requests, including but not limited to author (and his/her detailed info), time, message/body, and number of comments. Raw data can be found under <a href="https://github.com/5293-project-statistical-graphics/final-project/tree/main/resources/rawdata" target="&quot;_blank">resources/rawdata</a> folder</p>
 
 </div>
             </section>
