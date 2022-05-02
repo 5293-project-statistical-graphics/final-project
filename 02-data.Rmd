@@ -43,6 +43,6 @@ crawler <- function(owner, repo, content){
 ### END not run
 ```
 
-Until `r until.time`, ggplot2 has `r length(read_json(path = "resources/rawdata/ggplot2_commits.json"))` commits and plotly.R has `r length(read_json(path = "resources/rawdata/plotly.R_commits.json"))` commits. Until the last crawling, ggplot2 has `r length(read_json(path = "resources/rawdata/ggplot2_issues.json"))` issues and pull requests and plotly.R has `r length(read_json(path = "resources/rawdata/plotly.R_issues.json"))` . 
+As of `r until.time`, ggplot2 has `r length(read_json(path = "resources/rawdata/ggplot2_commits.json"))` commits and plotly.R has `r length(read_json(path = "resources/rawdata/plotly.R_commits.json"))` commits. Until the last crawling (2022-05-01 18:00:00 EDT), ggplot2 has `r length(read_json(path = "resources/rawdata/ggplot2_issues.json"))` issues and pull requests and plotly.R has `r length(read_json(path = "resources/rawdata/plotly.R_issues.json"))` . 
 
 The raw data provide a lot of info about the commits, issues and pull requests, including but not limited to author (and his/her detailed info), time, message/body, and number of comments. Raw data can be found under [resources/rawdata](https://github.com/5293-project-statistical-graphics/final-project/tree/main/resources/rawdata){target="_blank} folder

@@ -82,7 +82,7 @@ multi.line_plot <- function(tibble){
     mutate(created_year = year(created_at) - 2000) %>%
     mutate(author_association = 
              ifelse(author_association %in% c("MEMBER", "COLLABORATOR"), 
-                    "COLLABORATOR/MEMBER", author_association)) %>%
+                    "COLLABORATOR / MEMBER", author_association)) %>%
     count(repo, category, author_association, created_year, name = "number") %>%
     ggplot(aes(x = created_year, y = number, color = author_association)) +
     geom_line() + geom_point() +
@@ -129,32 +129,38 @@ g10<-pull %>%
 grid.arrange(g9,g10,ncol=1)
 ```
 
-Issue and pull request can have two states, open and closed, which is usually to indicate if the issue has been solved or if the pull request has been accepted/rejected. We can see that both packages have very few open pull requests but plotly has far more open issues than ggplot in relative and absolute scale.
+Issue and pull request can have two states, open and closed, which indicates if the issue has been solved or if the pull request has been accepted/rejected. We can see that both packages have very few open pull requests but plotly has far more open issues than ggplot both in relative and absolute scale.
 ```{r}
 issue_and_pull_request %>% 
   count(repo, category, state, name = "count") %>% 
   ggplot(aes(x = state, y = count, fill = repo, label = count)) + 
   geom_col(position = "dodge") + 
   geom_text(position = position_dodge(width = 1), vjust = -0.5) +
-  facet_wrap(~category)
+  facet_wrap(~category) +
+  labs(title = "Plotly has more issues that are still open",
+       subtitle = "ggplot2 v.s. plotly, number of open/close issues and pull requests.")
 ```
-Let's first examine the open issues. Although ggplot has more issues than plotly, plotly 
+
+Let's first dive into the open issues. We can see that the percentage of "open" issues (issues whose states are still open) increases for plotly, especially for the past three years. Although we would expect some increases since earlier created issues are given more time to solve, yet plotly's increases is substantial (from 30%+ in 2019 to 50%+ in 2020 and to 70%+ in 2021). When compared to ggplot, plotly's percentage of both issues and pull requests are much higher even though plotly has fewer issue and pull requests than ggplot in absolute terms.
 ```{r}
-issue %>%
-  select(created_at, closed_at, repo, author_association, state, repo) %>%
+issue_and_pull_request %>%
+  select(created_at, closed_at, repo, author_association, state, repo, category) %>%
   mutate(created.year = (format(created_at, "%y")) %>% as.factor) %>%
-  count(repo, created.year, state, name = "count") %>%
-  group_by(repo, created.year) %>% 
+  count(repo, category, created.year, state, name = "count") %>%
+  group_by(repo, category, created.year) %>% 
   mutate(perc = count / sum(count)) %>%
   filter(state == "open") %>%
   ggplot(aes(x = created.year, y = perc, fill = repo)) +
   geom_col(position = "dodge") +
+  scale_y_continuous(labels = scales::percent) +
+  facet_wrap(~category) +
   labs(x = "created at (year)", y = "percentage" ,
-       title = "Percentage of open issues over 2014-2021",
-       captiom = "note percentage is calculated over total issue created within each years")
+       title = "% of issues whose state are still open increases over the past few year for Plotly",
+       subtitle = "ggplot2 v.s. plotly, % of issues and pull requests created each year whose state are still open over 2014-2021",
+       caption = "Note: percentage is calculated over total issues/pull requests created within each year")
 ```
 
-Next, let's move our attention to closed issues and pull requests. Most of issues/pull requests were closed within one month but plotly seems to have larger percentage of issues that were open more than one year.
+Next, let's move our attention to closed issues and pull requests. We calculate issues and pull requests' solved time (which is defined as close time - create time) and divided the time into periods of 30 days (or 1 month). And we can see most of issues/pull requests were closed within one month but plotly seems to have larger percentage of issues that were open for more than one year.
 ```{r, fig.width=8}
 time.period <- c(0, seq(30, 360, 30), 2000)
 time.labels <- c(sapply(1:12, function(x){paste("<", x, " month", sep="")}), ">1 year")
@@ -172,14 +178,16 @@ issue_and_pull_request_perc %>%
   filter(! is.na(solve.period)) %>%
   ggplot(aes(x = solve.period, y = perc, fill = repo)) +
   geom_col(position="dodge") +
+  scale_y_continuous(labels = scales::percent) +
   facet_wrap(~category, ncol = 1) +
   labs(x = "time period", y ="percentage", 
-       title = "Most of issues/pull requests were closed within one month."
-       ,caption = "Note: percentage is calculated over both open and closed issues/pull requests")
+       title = "Most of issues/pull requests were closed within one month.",
+       subtitle = "% of issues/pull requests whose solved time falls into each periods of 1 month",
+       caption = "Note: percentage is calculated over both open and closed issues/pull requests")
 
 ```
 
-Breaking down the percentage over 2014-2021, we can see that both packages seems to having a trend of taking longer to "close" their issues, especially for plotly. 
+Breaking down the percentage over 2014-2021, we can see that both packages seems to having a trend of taking longer to "close" their issues. But the pattern is very different for pull requests, the percentage of pull requests closes within one month increases for the past several years. The contrast is most spark for plotly in 2021, only about 25 percent of issues are closed within two months, but over 80% of pull requests are closed within one month.
 ```{r, fig.height=6}
 issue_and_pull_request_perc %>%
   count(category, repo, created.year, solve.period, name = "count") %>%
@@ -188,6 +196,7 @@ issue_and_pull_request_perc %>%
   filter(! is.na(solve.period)) %>%
   ggplot(aes(x = created.year, y = solve.period, fill = perc)) +
   geom_tile() +
+  geom_text(aes(label = round(perc, 3))) +
   scale_fill_gradient(low="white", high="blue") +
   facet_grid(category~repo) + 
   labs(x = "created at (year)", y = "time period", fill = "percentage", 
