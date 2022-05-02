@@ -23,7 +23,7 @@
 <meta name="author" content="Yujie Tu, Yuchen Meng" />
 
 
-<meta name="date" content="2022-05-01" />
+<meta name="date" content="2022-05-02" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -180,13 +180,13 @@ In particular, the number of commits for ggplot2 has a significant period fluctu
 <img src="finalproj_files/figure-html/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>Both packages have similar distribution shape for all author associations and they all have long right tail. And there is a small peak for comments equal to 10 for plotly. Comparing two packages, ggplot2 is more likely to have a heavy tail.</p>
 <p><img src="finalproj_files/figure-html/unnamed-chunk-19-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>Issue and pull request can have two states, open and closed, which is usually to indicate if the issue has been solved or if the pull request has been accepted/rejected. We can see that both packages have very few open pull requests but plotly has far more open issues than ggplot in relative and absolute scale.
-<img src="finalproj_files/figure-html/unnamed-chunk-20-1.png" width="672" style="display: block; margin: auto;" />
-Let’s first examine the open issues. Although ggplot has more issues than plotly, plotly
+<p>Issue and pull request can have two states, open and closed, which indicates if the issue has been solved or if the pull request has been accepted/rejected. We can see that both packages have very few open pull requests but plotly has far more open issues than ggplot both in relative and absolute scale.
+<img src="finalproj_files/figure-html/unnamed-chunk-20-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Let’s first dive into the open issues. We can see that the percentage of “open” issues (issues whose states are still open) increases for plotly, especially for the past three years. Although we would expect some increases since earlier created issues are given more time to solve, yet plotly’s increases is substantial (from 30%+ in 2019 to 50%+ in 2020 and to 70%+ in 2021). When compared to ggplot, plotly’s percentage of both issues and pull requests are much higher even though plotly has fewer issue and pull requests than ggplot in absolute terms.
 <img src="finalproj_files/figure-html/unnamed-chunk-21-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>Next, let’s move our attention to closed issues and pull requests. Most of issues/pull requests were closed within one month but plotly seems to have larger percentage of issues that were open more than one year.
+<p>Next, let’s move our attention to closed issues and pull requests. We calculate issues and pull requests’ solved time (which is defined as close time - create time) and divided the time into periods of 30 days (or 1 month). And we can see most of issues/pull requests were closed within one month but plotly seems to have larger percentage of issues that were open for more than one year.
 <img src="finalproj_files/figure-html/unnamed-chunk-22-1.png" width="768" style="display: block; margin: auto;" /></p>
-<p>Breaking down the percentage over 2014-2021, we can see that both packages seems to having a trend of taking longer to “close” their issues, especially for plotly.
+<p>Breaking down the percentage over 2014-2021, we can see that both packages seems to having a trend of taking longer to “close” their issues. But the pattern is very different for pull requests, the percentage of pull requests closes within one month increases for the past several years. The contrast is most spark for plotly in 2021, only about 25 percent of issues are closed within two months, but over 80% of pull requests are closed within one month.
 <img src="finalproj_files/figure-html/unnamed-chunk-23-1.png" width="672" style="display: block; margin: auto;" /></p>
 
 </div>
