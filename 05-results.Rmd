@@ -72,7 +72,7 @@ g6 <- line_plot(pull %>% rename(date = created_at)) +
 grid.arrange(g5, g6, g4, ncol = 1)
 ```
 ## Which roles attached most during years?
-Due to the same meaning in the definition of "COLLABORATOR" and "MEMBER" in these two packages, we combine these two classes into "MEMBER". Issues are mainly created by common users of these packages. Pull requests are mostly created by members of these packages. Due to pandemic, these packages are not as popular as before.
+We can look into details of users roles to explore. Due to the same meaning in the definition of "COLLABORATOR" and "MEMBER" in these two packages, we combine these two classes into "MEMBER". Issues are mainly created by common users of these packages. Pull requests are mostly created by members of these packages. Due to pandemic, these packages are not as popular as before.
 ```{r}
 # function to make multi-line plot, number for different author_association versus year
 multi.line_plot <- function(tibble){
@@ -95,7 +95,7 @@ multi.line_plot(issue_and_pull_request) +
 
 ```
 ## Do distributions of different roles vary?
-Both packages have similar distribution shape for all author associations and they all have long right tail. And there is a small peak for comments equal to 10 for plotly. Comparing two packages, ggplot2 is more likely to have a heavy tail.
+The distribution of different roles may have an influence on the previous question. Therefore, we need to focus on the distributions of different roles. Both packages have similar distribution shape for all author associations and they all have long right tail. And there is a small peak for comments equal to 10 for plotly. Comparing two packages, ggplot2 is more likely to have a heavy tail.
 
 ```{r}
 g9<-issue %>% 
