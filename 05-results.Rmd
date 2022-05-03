@@ -44,9 +44,9 @@ g3 <- bar_plot(pull %>% rename(date = created_at)) +
 grid.arrange(g2, g3, g1, ncol=1)
 ```
 ## Are users more attached during years?
-For plotly, the number of issues and commits first increases and then has a decreasing trend after 2016. And for number of pull request of plotly, it has a decreasing trend. For ggplot2, the number of issues, pull requests and commits have a fluctuate process.  
+For plotly, the number of issues and commits first increases and then has a decreasing trend after 2016. And for number of pull request of plotly, it has a decreasing trend.   
 Users are more interested in the package when it newly came out. After pandemic, less focus is put on these two packages.  
-In particular, the number of commits for ggplot2 has a significant period fluctuation during time.   
+  
 ```{r, fig.height=8}
 # function to make line chart, number versus year
 line_plot <- function(tibble){
@@ -110,6 +110,7 @@ g9<-issue %>%
                       geom = "density_ridges_gradient") +
   facet_wrap(~author_association) +
   scale_fill_brewer(name = "quantile", labels = c("1st", "2nd", "3rd", "4th")) + 
+  labs(title="Distribution of issue")+
   theme_ridges()
 
 g10<-pull %>% 
@@ -124,6 +125,7 @@ g10<-pull %>%
                       geom = "density_ridges_gradient") +
   facet_wrap(~author_association) +
   scale_fill_brewer(name = "quantile", labels = c("1st", "2nd", "3rd", "4th")) + 
+  labs(title="Distribution of pull requests")+
   theme_ridges()
 grid.arrange(g9,g10,ncol=1)
 ```
