@@ -39,7 +39,8 @@ data <- tibble(date = rep(seq(2014, 2022 - 1/12, 1/12), 2),
   full_join(mutate_data(pull %>% rename(date = created_at), "pull_request")) %>%
   replace_na(list(commit = 0, issue = 0, pull_request = 0))
 ```
-
+## How about seeing time trend in a dynamic way?
+The line fluctuates during years and after 2018, ggplot2 is in the higher position for pull requests and issues.
 ```{r}
 anim <- data %>% 
   pivot_longer(cols = c(commit, issue, pull_request), names_to = "category") %>%
@@ -52,6 +53,8 @@ anim <- data %>%
 anim_save("resources/anim_linechart.gif", anim)
 anim
 ```
+## Look deep into the overview
+We can choose the part to see the overview of time trends for these two packages. A decreasing trend for the commits of both packages over time. And an increasing trend for both packages in 2015.
 ```{r}
 data <- tibble(date = rep(seq(2014, 2022 - 1/12, 1/12), 2), 
                repo = rep(c("ggplot2", "plotly"), each = 96)) %>%
