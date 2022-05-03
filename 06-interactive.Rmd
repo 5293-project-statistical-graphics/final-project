@@ -41,7 +41,7 @@ data <- tibble(date = rep(seq(2014, 2022 - 1/12, 1/12), 2),
 ```
 
 ```{r}
-data %>% 
+anim <- data %>% 
   pivot_longer(cols = c(commit, issue, pull_request), names_to = "category") %>%
   ggplot(aes(x = date, y = value, color = repo)) +
   geom_line() +
@@ -49,6 +49,7 @@ data %>%
   facet_wrap(~category, ncol = 1, scale = "free_y") +
   theme_ipsum() +
   transition_reveal(date)
+anim
 ```
 
 ```{r}
@@ -63,6 +64,7 @@ updatemenus <- list(
   list(
     active = 0,
     type=  "buttons",
+    x = -0.1,
     buttons = list(
       list(
         label = "commit",
