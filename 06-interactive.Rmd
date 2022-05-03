@@ -41,17 +41,17 @@ data <- tibble(date = rep(seq(2014, 2022 - 1/12, 1/12), 2),
 ```
 
 ```{r}
-anim <- data %>% 
-  pivot_longer(cols = c(commit, issue, pull_request), names_to = "category") %>%
-  ggplot(aes(x = date, y = value, color = repo)) +
-  geom_line() +
-  geom_point() +
-  facet_wrap(~category, ncol = 1, scale = "free_y") +
-  theme_ipsum() +
-  transition_reveal(date)
-anim
+# anim <- data %>% 
+#   pivot_longer(cols = c(commit, issue, pull_request), names_to = "category") %>%
+#   ggplot(aes(x = date, y = value, color = repo)) +
+#   geom_line() +
+#   geom_point() +
+#   facet_wrap(~category, ncol = 1, scale = "free_y") +
+#   theme_ipsum() +
+#   transition_reveal(date)
+# anim_save("resources/anim_linechart.gif", anim)
 ```
-
+![](resources/anim_linechart.gif)
 ```{r}
 data <- tibble(date = rep(seq(2014, 2022 - 1/12, 1/12), 2), 
                repo = rep(c("ggplot2", "plotly"), each = 96)) %>%
