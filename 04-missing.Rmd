@@ -1,1 +1,36 @@
 # Missing values
+
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, fig.align = "center")
+``` 
+
+```{r}
+library(visdat)
+library(tidyverse)
+library(gridExtra)
+```
+
+```{r}
+commit <- read_csv("resources/data/commits.csv")
+issue <- read_csv("resources/data/issues.csv")
+pull <- read_csv("resources/data/pull_requests.csv")
+```
+
+We can see that commit has no missing value.
+```{r}
+vis_miss(commit) + labs(title = "Missing pattern for commits")
+```
+  
+We can see that `closed_at` columns of issues whose state are open are completely missing, which makes sense since "open" issue won't have a closed date.
+```{r, fig.height=8}
+v1 <- vis_miss(issue %>% filter(state == "open")) + labs(title = "Missing pattern for issues whose state are open")
+v2 <- vis_miss(issue %>% filter(state == "closed")) + labs(title = "Missing pattern for issues whose state are closed")
+grid.arrange(v1, v2, ncol = 1)
+```
+The same applies for pull requests. Only `closed_at` columns of pull requests whose state are open are completely missing.
+```{r, fig.height=8}
+v1 <- vis_miss(issue %>% filter(state == "open")) + labs(title = "Missing pattern for issues whose state are open")
+v2 <- vis_miss(issue %>% filter(state == "closed")) + labs(title = "Missing pattern for issues whose state are closed")
+grid.arrange(v1, v2, ncol = 1)
+```

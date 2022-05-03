@@ -1,9 +1,15 @@
 # Conclusion
 
 From the bar chart, users of both packages prefer to create pull requests, issues and commits during weekdays rather than weekends. This is probably because modification is part of daily missions for most users and they prefer to finish their work during weekdays and then enjoy weekends. When we compare two packages, ggplot2 has more pull requests and issues rather than commits than plotly. Therefore, users prefer to solve the problems in "plotly". It means a strong expectation for updating "plotly".  
+
 From line chart, pandemic has an influence for the update of two packages because numbers of three parts have decreased after 2019. Users are interested in the package when it newly came out.  
+
 Issues are created by common users when they try to use the packages and pull requests are mostly created by the members of packages because their work is to update the packages depending on the issues.  
+
 Median of comments on ggplot2 is larger than that on plotly. It means a lot of users pay a close attention on the older package ggplot2. ggplot2 doesn't lose the attraction to the users.  
+
 Most of pull requests and issues cases are solved and then closed. For the open issues and pull requests, plotly exceeds ggplot2. Some hypothesis may account for this. Issues of plotly may be difficult to solve or the maintainers of plotly respond slowly or the public involved are not active to solve the problems.  
+
 There is a significant increase gap after 2018 for both packages. There are two hypothesis. From 2018, users focus more on the data visualization and then use these two packages more often so they found more percentage of issues and pull requests to be solved. And then after the pandemic, the update of these two packages became inactive so the percentage of open issue and pull requests gets even higher.  
+
 The average close time can show the activity of these packages. These packages solve the issues and pull requests mostly in one month. But it takes "longer" to solve the issues over time and takes "shorter" to solve the pull requests. So these packages are still active and users are willing to update them but the problems are difficult to work out.  

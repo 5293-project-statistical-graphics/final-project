@@ -12,7 +12,6 @@ library(gridExtra)
 ```
 
 ## Users prefer weekdays or weekends?
-
 ```{r}
 commit <- read_csv("resources/data/commits.csv") %>% filter(year(date) >= 2014)
 issue <- read_csv("resources/data/issues.csv")  %>% filter(year(created_at) >= 2014)
@@ -43,10 +42,11 @@ g3 <- bar_plot(pull %>% rename(date = created_at)) +
   labs(x = "created at (weekday)", title = "Number of pull request created per weekday")
 grid.arrange(g2, g3, g1, ncol=1)
 ```
+
 ## Are users more attached during years?
+
 For plotly, the number of issues and commits first increases and then has a decreasing trend after 2016. And for number of pull request of plotly, it has a decreasing trend.   
 Users are more interested in the package when it newly came out. After pandemic, less focus is put on these two packages.  
-  
 ```{r, fig.height=8}
 # function to make line chart, number versus year
 line_plot <- function(tibble){
@@ -71,7 +71,9 @@ g6 <- line_plot(pull %>% rename(date = created_at)) +
 
 grid.arrange(g5, g6, g4, ncol = 1)
 ```
+
 ## Which roles attached most during years?
+
 We can look into details of users roles to explore. Due to the same meaning in the definition of "COLLABORATOR" and "MEMBER" in these two packages, we combine these two classes into "MEMBER". Issues are mainly created by common users of these packages. Pull requests are mostly created by members of these packages. Due to pandemic, these packages are not as popular as before.
 ```{r}
 # function to make multi-line plot, number for different author_association versus year
@@ -94,7 +96,9 @@ multi.line_plot(issue_and_pull_request) +
        title = "Breakdown of numbers of issues/pull requests over author association")
 
 ```
+
 ## Do distributions of different roles vary?
+
 The distribution of different roles may have an influence on the previous question. Therefore, we need to focus on the distributions of different roles. Both packages have similar distribution shape for all author associations and they all have long right tail. And there is a small peak for comments equal to 10 for plotly. Comparing two packages, ggplot2 is more likely to have a heavy tail.
 
 ```{r}
@@ -129,7 +133,9 @@ g10<-pull %>%
   theme_ridges()
 grid.arrange(g9,g10,ncol=1)
 ```
+
 ## Are most of issues and pull requests still unsolved?
+
 Issue and pull request can have two status, open and closed, which indicates if the issue has been solved or if the pull request has been accepted/rejected. We can see that both packages have very few open pull requests but plotly has far more open issues than ggplot both in relative and absolute scale.
 ```{r}
 issue_and_pull_request %>% 
@@ -141,7 +147,9 @@ issue_and_pull_request %>%
   labs(title = "Plotly has more issues that are still open",
        subtitle = "ggplot2 v.s. plotly, number of open/close issues and pull requests.")
 ```
+
 # Are open cases amounts increasing?
+
 Let's first dive into the open issues. We can see that the percentage of "open" issues (issues whose status are still open) increases for plotly, especially for the past three years. Although we would expect some increases since earlier created issues are given more time to solve, yet plotly's increases is substantial (from 30%+ in 2019 to 50%+ in 2020 and to 70%+ in 2021). When compared to ggplot, plotly's percentage of both issues and pull requests are much higher even though plotly has fewer issue and pull requests than ggplot in absolute terms.
 ```{r}
 issue_and_pull_request %>%
@@ -160,7 +168,9 @@ issue_and_pull_request %>%
        subtitle = "ggplot2 v.s. plotly, % of issues and pull requests created each year whose status are still open over 2014-2021",
        caption = "Note: percentage is calculated over total issues/pull requests created within each year")
 ```
+
 ## How long does it take to solve issues and pull requests?
+
 Next, let's move our attention to closed issues and pull requests. We calculate issues and pull requests' solved time (which is defined as close time - create time) and divided the time into periods of 30 days (or 1 month). And we can see most of issues/pull requests were closed within one month but plotly seems to have larger percentage of issues that were open for more than one year.
 ```{r, fig.width=8}
 time.period <- c(0, seq(30, 360, 30), 2000)
@@ -188,7 +198,9 @@ issue_and_pull_request_perc %>%
        caption = "Note: percentage is calculated over both open and closed issues/pull requests")
 
 ```
+
 ## Do different years have different solving pattern?
+
 Breaking down the percentage over 2014-2021, we can see that both packages seems to having a trend of taking longer to "close" their issues. But the pattern is very different for pull requests, the percentage of pull requests closes within one month increases for the past several years. The contrast is most spark for plotly in 2021, only about 25 percent of issues are closed within two months, but over 80% of pull requests are closed within one month.
 ```{r, fig.height=8}
 issue_and_pull_request_perc %>%
