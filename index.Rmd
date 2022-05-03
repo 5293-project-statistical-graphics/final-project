@@ -7,16 +7,16 @@ site: bookdown::bookdown_site
 
 # Introduction
 
-Nowadays, plots are popular among all fields because of its conciseness and clearness. R is famous as a powerful tool of making nice plots. Among various R packages, ggplot2 and plotly are two well-known and common tools. But they are of different types, both in attributions and results they provide. 
+Nowadays, plots are popular among all fields because of its conciseness and clearness. R is famous as a powerful tool of making nice plots. Among various R graphical packages, ggplot2 and plotly are two well-known and common tools. But they have different graphing philosophy and in consequence have different syntax and features. 
 
-ggplot2 is an open-sourced data visualization package created by Hadley Wickham. ggplot2 is a system for declaratively creating graphics, based on The Grammar of Graphics. And plotly is a commercial package and popular these years though it is younger than ggplot2. Plotly is designed by a technical computing company.
+ggplot2 is an open-source data visualization package and an implementation of [A Layered Grammar of Graphics](https://vita.had.co.nz/papers/layered-grammar.pdf), which enables us to concisely describe the components of a graphic. It ggplot2 allows users to incorporate various forms of complexity to their visualizations without additional hassle, and remove them with ease if necessary.   
 
-Due to the difference of these two packages, different group of people may have diverse preference. Plotly has simple syntax and is compatible with many languages. Plotly’s visualization library offers users enhanced interactivity features, such as the ability to interact with graphs on display and zoom in and out. In terms of ggplot2, ggplot2 allows users to incorporate various forms of complexity to their visualizations without additional hassle, and also remove them with ease if necessary.   
+While plotly is also an open-source package designed by a technical computing company and gains popularity over past years though it is younger than ggplot2. It has simple syntax and is compatible with many languages. Plotly’s visualization library offers users enhanced interactivity features, such as the ability to interact with graphs on display.
 
-There is an increasing trend to use Github as a tool for computer science and other computer related field. Especially, we learn the instructions of Github in class. And the data of Github can reflect some information of the update process of packages, so we can focus on ggplot2 and plotly and try to explore the information of these packages.  
-
-The topic we are interested in is the differences between these two packages in Github development. When the users want to involve in the development of packages, they will pull requests on the Github and then issue some problems that they think should be solved. After these messages are posted on the Github, some other users will see them and try to fix them. And then they can also create their commits to Github to share it with others. With their cooperation, the packages will develop and update. In this situation, the problems we have is:  
+Both ggplot2 and plotly uses GitHub for version control and code management. And we would like to see and compare the development of these two packages through data crawled from GitHub REST API. Specifically, we will crawl commits of main branch, issues, and pull requests for both packages. And the problems we have are:  
 
 1) The quantity pattern of pull requests, issues and commits for these two packages during time.  
 2) The solving pattern of pull requests and issues for these two packages.  
 3) Whether the pandemic has an impact on the development of these two packages.  
+
+Here is a little bit detail on how GitHub works: usually, a project on GitHub will have a handful of key developers to develop and maintain. But there can be a whole community of users help this process. They can report problems by submitting an [issue](https://docs.github.com/en/issues), they can help change the source code (fix a bug, add a new feature, and etc.) by submitting a [pull request](https://docs.github.com/en/pull-requests), and all users need to [commit](https://docs.github.com/en/pull-requests/committing-changes-to-your-project) their local changes to GitHub so that their modification can be seen online by other users. Of course, we omit tons of details in this short summary, you can learn about all the details about how GitHub works [here](https://docs.github.com/en/get-started) 

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 6 Are open cases amounts increasing? | 5293-Final Project</title>
+  <meta name="description" content="Chapter 6 Are open cases amounts increasing? | 5293-Final Project" />
+  <meta name="generator" content="bookdown 0.25 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 6 Are open cases amounts increasing? | 5293-Final Project" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 6 Are open cases amounts increasing? | 5293-Final Project" />
+  
+  
+  
+
+<meta name="author" content="Yujie Tu, Yuchen Meng" />
+
+
+<meta name="date" content="2022-05-03" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="results.html"/>
+<link rel="next" href="interactive-component.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">SHORT TITLE HERE</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Introduction<span></span></a></li>
+<li class="chapter" data-level="2" data-path="data-sources.html"><a href="data-sources.html"><i class="fa fa-check"></i><b>2</b> Data sources<span></span></a></li>
+<li class="chapter" data-level="3" data-path="data-transformation.html"><a href="data-transformation.html"><i class="fa fa-check"></i><b>3</b> Data transformation<span></span></a></li>
+<li class="chapter" data-level="4" data-path="missing-values.html"><a href="missing-values.html"><i class="fa fa-check"></i><b>4</b> Missing values<span></span></a></li>
+<li class="chapter" data-level="5" data-path="results.html"><a href="results.html"><i class="fa fa-check"></i><b>5</b> Results<span></span></a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="results.html"><a href="results.html#users-prefer-weekdays-or-weekends"><i class="fa fa-check"></i><b>5.1</b> Users prefer weekdays or weekends?<span></span></a></li>
+<li class="chapter" data-level="5.2" data-path="results.html"><a href="results.html#slow-down-during-pandemic"><i class="fa fa-check"></i><b>5.2</b> Slow down during pandemic?<span></span></a></li>
+<li class="chapter" data-level="5.3" data-path="results.html"><a href="results.html#who-are-the-most-active-users-over-years"><i class="fa fa-check"></i><b>5.3</b> Who are the most active users over years?<span></span></a></li>
+<li class="chapter" data-level="5.4" data-path="results.html"><a href="results.html#do-distributions-of-different-roles-vary"><i class="fa fa-check"></i><b>5.4</b> Do distributions of different roles vary?<span></span></a></li>
+<li class="chapter" data-level="5.5" data-path="results.html"><a href="results.html#are-most-of-issues-and-pull-requests-still-unsolved"><i class="fa fa-check"></i><b>5.5</b> Are most of issues and pull requests still unsolved?<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="are-open-cases-amounts-increasing.html"><a href="are-open-cases-amounts-increasing.html"><i class="fa fa-check"></i><b>6</b> Are open cases amounts increasing?<span></span></a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="are-open-cases-amounts-increasing.html"><a href="are-open-cases-amounts-increasing.html#how-long-does-it-take-to-solve-issues-and-pull-requests"><i class="fa fa-check"></i><b>6.1</b> How long does it take to solve issues and pull requests?<span></span></a></li>
+<li class="chapter" data-level="6.2" data-path="are-open-cases-amounts-increasing.html"><a href="are-open-cases-amounts-increasing.html#do-different-years-have-different-solving-pattern"><i class="fa fa-check"></i><b>6.2</b> Do different years have different solving pattern?<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="interactive-component.html"><a href="interactive-component.html"><i class="fa fa-check"></i><b>7</b> Interactive component<span></span></a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="interactive-component.html"><a href="interactive-component.html#how-about-seeing-time-trend-in-a-dynamic-way"><i class="fa fa-check"></i><b>7.1</b> How about seeing time trend in a dynamic way?<span></span></a></li>
+<li class="chapter" data-level="7.2" data-path="interactive-component.html"><a href="interactive-component.html#look-deep-into-the-overview"><i class="fa fa-check"></i><b>7.2</b> Look deep into the overview<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="conclusion.html"><a href="conclusion.html"><i class="fa fa-check"></i><b>8</b> Conclusion<span></span></a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">5293-Final Project</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="are-open-cases-amounts-increasing" class="section level1 hasAnchor" number="6">
+<h1><span class="header-section-number">Chapter 6</span> Are open cases amounts increasing?<a href="are-open-cases-amounts-increasing.html#are-open-cases-amounts-increasing" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Let’s first dive into the open issues. We can see that the percentage of “open” issues (issues whose status are still open) increases for plotly, especially for the past three years. Although we would expect some increases since earlier created issues are given more time to solve, yet plotly’s increases is substantial (from 30%+ in 2019 to 50%+ in 2020 and to 70%+ in 2021). When compared to ggplot, plotly’s percentage of both issues and pull requests are much higher even though plotly has fewer issue and pull requests than ggplot in absolute terms.
+<img src="finalproj_files/figure-html/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<div id="how-long-does-it-take-to-solve-issues-and-pull-requests" class="section level2 hasAnchor" number="6.1">
+<h2><span class="header-section-number">6.1</span> How long does it take to solve issues and pull requests?<a href="are-open-cases-amounts-increasing.html#how-long-does-it-take-to-solve-issues-and-pull-requests" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Next, let’s move our attention to closed issues and pull requests. We calculate issues and pull requests’ solved time (which is defined as close time - create time) and divided the time into periods of 30 days (or 1 month). And we can see most of issues/pull requests were closed within one month but plotly seems to have larger percentage of issues that were open for more than one year.
+<img src="finalproj_files/figure-html/unnamed-chunk-12-1.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="do-different-years-have-different-solving-pattern" class="section level2 hasAnchor" number="6.2">
+<h2><span class="header-section-number">6.2</span> Do different years have different solving pattern?<a href="are-open-cases-amounts-increasing.html#do-different-years-have-different-solving-pattern" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Breaking down the percentage over 2014-2021, we can see that both packages seems to having a trend of taking longer to “close” their issues. But the pattern is very different for pull requests, the percentage of pull requests closes within one month increases for the past several years. The contrast is most spark for plotly in 2021, only about 25 percent of issues are closed within two months, but over 80% of pull requests are closed within one month.
+<img src="finalproj_files/figure-html/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="results.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="interactive-component.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/5293-project-statistical-graphics/final-project/edit/main/05-results.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": "https://github.com/5293-project-statistical-graphics/final-project/blob/main/05-results.Rmd",
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
