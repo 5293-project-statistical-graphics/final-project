@@ -8,7 +8,7 @@ library(jsonlite)
 ```
 
 The following function extracts several properties from commit raw data.
-```{r}
+```{r, echo=TRUE}
 clean_commits <- function(raw.commits, repo){
   clean.commits <- tibble(commit_info = raw.commits) %>%
     mutate(
