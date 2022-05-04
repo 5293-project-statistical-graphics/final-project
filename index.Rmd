@@ -9,11 +9,11 @@ site: bookdown::bookdown_site
 
 Nowadays, plots are popular among all fields because of its conciseness and clearness. R is famous as a powerful tool of making nice plots. Among various R graphical packages, ggplot2 and plotly are two well-known and common tools. But they have different graphing philosophy and in consequence have different syntax and features. 
 
-ggplot2 is an open-source data visualization package and an implementation of [A Layered Grammar of Graphics](https://vita.had.co.nz/papers/layered-grammar.pdf), which enables us to concisely describe the components of a graphic. It ggplot2 allows users to incorporate various forms of complexity to their visualizations without additional hassle, and remove them with ease if necessary.   
+[ggplot2](https://ggplot2.tidyverse.org/) is an open-source data visualization package and an implementation of [A Layered Grammar of Graphics](https://vita.had.co.nz/papers/layered-grammar.pdf), which enables us to concisely describe the components of a graphic. It ggplot2 allows users to incorporate various forms of complexity to their visualizations without additional hassle, and remove them with ease if necessary.   
 
-While plotly is also an open-source package designed by a technical computing company and gains popularity over past years though it is younger than ggplot2. It has simple syntax and is compatible with many languages. Plotly’s visualization library offers users enhanced interactivity features, such as the ability to interact with graphs on display.
+While [plotly](https://plotly.com/r/) is also an open-source package designed by a technical computing company and gains popularity over past years though it is younger than ggplot2. It has simple syntax and is compatible with many languages. Plotly’s visualization library offers users enhanced interactivity features, such as the ability to interact with graphs on display.
 
-Both ggplot2 and plotly uses GitHub for version control and code management. And we would like to see and compare the development of these two packages through data crawled from GitHub REST API. Specifically, we will crawl commits of main branch, issues, and pull requests for both packages. And the problems we have are:  
+Both [ggplot2](https://github.com/tidyverse/ggplot2) and [plotly](https://github.com/plotly/plotly.R) uses GitHub for version control and code management. And we would like to see and compare the development of these two packages through data crawled from GitHub REST API. Specifically, we will crawl commits of main branch, issues, and pull requests for both packages. And the problems we have are:  
 
 1) The quantity pattern of pull requests, issues and commits for these two packages during time.  
 2) The solving pattern of pull requests and issues for these two packages.  
