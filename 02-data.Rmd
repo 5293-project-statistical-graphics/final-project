@@ -2,15 +2,13 @@
 
 We used GitHub REST API to crawl two popular R package's repositories, ggplot2 and plotly and we will focus on the repositories main branches' commits, issues and pull requests since these three components can provide some insights on the projects' development progress and popularity changes over time. The reason why we only choose main branch is that the main branch can reflect the published modifications (since user can directly install packages on main branch through devtools::install_github). And we will restrict all the data to be prior to 2022 (commit time of a commit and created time of issue/pull request). 
 
-```{r}
+
+The following function will crawl the "content" of `github.com/owner/repo` where "content" can be "commits" or "issues" (more info [here](https://docs.github.com/en/rest){target="_blank"}) Notice that issues API will return both issues and pull requests.
+```{r, echo=TRUE}
 library(gh)
 library(jsonlite)
 library(readr)
 library(dplyr)
-```
-
-The following function will crawl the "content" of `github.com/owner/repo` where "content" can be "commits" or "issues" (more info [here](https://docs.github.com/en/rest){target="_blank"}) Notice that issues API will return both issues and pull requests.
-```{r, echo=TRUE}
 # until.time only applies to commits
 until.time <- "2022-01-01T00:00:00Z"
 crawler <- function(owner, repo, content){
@@ -19,12 +17,14 @@ crawler <- function(owner, repo, content){
   cat("Each dot represent 100 records.\n")
   while(TRUE){
     response <- 
-      gh("GET /repos/{owner}/{repo}/{content}", owner = owner, repo = repo, 
-         content = content, per_page = 100, page = page, state = "all", until = until.time) 
+      gh("GET /repos/{owner}/{repo}/{content}", owner = owner, 
+         repo = repo, content = content, per_page = 100, 
+         page = page, state = "all", until = until.time) 
     cat(".")
     data.raw <- c(data.raw, response)
     page <- page + 1
-    # when the returned data has less than 100 records, break the loop since all the record has been crawled
+    # when the returned data has less than 100 records, break the loop 
+    # since all the record has been crawled
     if(length(response) != 100) break
   }
   cat("\n")
@@ -40,6 +40,6 @@ crawler <- function(owner, repo, content){
 ### END not run
 ```
 
-As of `r until.time`, ggplot2 has `r length(read_json(path = "resources/rawdata/ggplot2_commits.json"))` commits and plotly.R has `r length(read_json(path = "resources/rawdata/plotly.R_commits.json"))` commits. Until the last crawling (2022-05-01 18:00:00 EDT), ggplot2 has `r length(read_json(path = "resources/rawdata/ggplot2_issues.json"))` issues and pull requests and plotly.R has `r length(read_json(path = "resources/rawdata/plotly.R_issues.json"))` . 
+As of `r until.time`, ggplot2 has `r length(read_json(path = "resources/rawdata/ggplot2_commits.json"))` commits and plotly.R has `r length(read_json(path = "resources/rawdata/plotly.R_commits.json"))` commits. Until the last crawling (2022-05-01 18:00:00 EDT), ggplot2 has `r length(read_json(path = "resources/rawdata/ggplot2_issues.json"))` issues and pull requests and plotly.R has `r length(read_json(path = "resources/rawdata/plotly.R_issues.json"))` issues and pull requests. 
 
 The raw data provide a lot of info about the commits, issues and pull requests, including but not limited to author (and his/her detailed info), time, message/body, and number of comments. Raw data can be found under [resources/rawdata](https://github.com/5293-project-statistical-graphics/final-project/tree/main/resources/rawdata){target="_blank} folder
