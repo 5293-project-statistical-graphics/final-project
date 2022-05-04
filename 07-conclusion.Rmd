@@ -7,3 +7,5 @@
 (3) Plotly has more percentage of unsolved issues and pull requests and the solving time of closed cases takes longer. Some hypothesis can account for this. Issues of plotly may be difficult to solve or the maintainers of plotly respond slowly or the public involved are not active to solve the problems.  
 
 (4)The development of two packages has slowed down over the past few years. These years, it takes longer to close the issue and it takes shorter to close the pull requests. Some hypothesis can account for this. Due to the pandemic, the work efficiency has been influenced. Or both packages are up-to-date enough and the functions can meet user's need. Or the problems are too difficult to work out in a short time.
+
+Some limitations: It is hard to analysis all the increases, decreases or fluctuations simply based on the data we have since there may be tons of factors in play. If possible, we could also crawl all commits of other branches and see if it can add more information to our analysis. Furthermore, all the comments under each issues and pull requests may also be a good spot toe explore.

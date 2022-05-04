@@ -1,9 +1,5 @@
 # Interactive component
 
-```{r, include=FALSE}
-knitr::opts_chunk$set(warning = FALSE, message = FALSE, fig.align = "center")
-``` 
-
 ```{r}
 library(plotly)
 library(lubridate)

@@ -1,9 +1,5 @@
 # Data transformation
 
-```{r, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
-```
-
 The raw data comes in json format. We simply extracted desired properties from json and store them in a csv file. Since issue API does not allow us to crawl data prior a specific time, we will also remove issue and pull request created after 2022.
 ```{r}
 library(tidyverse)
