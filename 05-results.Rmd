@@ -197,9 +197,9 @@ issue_and_pull_request_perc %>%
 
 ```
 
-## Do different years exhibt different patterns to solve issue/pull request?
+## Do different years exhibit different patterns to solve issue/pull request?
 
-Breaking down the percentage over 2014-2021, we can see that both packages seems to having a trend of taking longer to "close" their issues. But the pattern is very different for pull requests, the percentage of pull requests closes within one month increases for the past several years. The contrast is most spark for plotly in 2021, only about 25 percent of issues are closed within two months, but over 80% of pull requests are closed within one month.
+Breaking down the percentage over 2014-2021, we can see that both packages seems to having a trend of taking longer to "close" their issues. But the pattern is very different for pull requests, the percentage of pull requests closes within one month increases for the past several years. The contrast is most spark for plotly in 2021, only about 25% of issues are closed within two months, but over 80% of pull requests are closed within one month.
 
 
 ```{r, fig.height=6}
