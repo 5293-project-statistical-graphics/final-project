@@ -1,6 +1,6 @@
 --- 
 title: "'Growing Up' of ggplot2 and plotly"
-author: "Yujie Tu, Yuchen Meng"
+author: "Yuchen Meng, Yujie Tu"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
 ---
