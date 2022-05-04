@@ -4,23 +4,23 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>‘Growing Up’ of ggplot2 and plotly</title>
-  <meta name="description" content="‘Growing Up’ of ggplot2 and plotly" />
+  <title>‘Growing’ of ggplot2 and plotly</title>
+  <meta name="description" content="‘Growing’ of ggplot2 and plotly" />
   <meta name="generator" content="bookdown 0.25 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="‘Growing Up’ of ggplot2 and plotly" />
+  <meta property="og:title" content="‘Growing’ of ggplot2 and plotly" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="‘Growing Up’ of ggplot2 and plotly" />
+  <meta name="twitter:title" content="‘Growing’ of ggplot2 and plotly" />
   
   
   
 
-<meta name="author" content="Yujie Tu, Yuchen Meng" />
+<meta name="author" content="Yuchen Meng, Yujie Tu" />
 
 
 <meta name="date" content="2022-05-04" />
@@ -175,7 +175,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div class="body-inner">
         <div class="book-header" role="navigation">
           <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">‘Growing Up’ of ggplot2 and plotly</a>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">‘Growing’ of ggplot2 and plotly</a>
           </h1>
         </div>
 
@@ -184,16 +184,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
             <section class="normal" id="section-">
 <div id="header">
-<h1 class="title">‘Growing Up’ of ggplot2 and plotly</h1>
-<p class="author"><em>Yujie Tu, Yuchen Meng</em></p>
+<h1 class="title">‘Growing’ of ggplot2 and plotly</h1>
+<p class="author"><em>Yuchen Meng, Yujie Tu</em></p>
 <p class="date"><em>2022-05-04</em></p>
 </div>
 <div id="introduction" class="section level1 hasAnchor" number="1">
 <h1><span class="header-section-number">Chapter 1</span> Introduction<a href="index.html#introduction" class="anchor-section" aria-label="Anchor link to header"></a></h1>
 <p>Nowadays, plots are popular among all fields because of its conciseness and clearness. R is famous as a powerful tool of making nice plots. Among various R graphical packages, ggplot2 and plotly are two well-known and common tools. But they have different graphing philosophy and in consequence have different syntax and features.</p>
-<p>ggplot2 is an open-source data visualization package and an implementation of <a href="https://vita.had.co.nz/papers/layered-grammar.pdf">A Layered Grammar of Graphics</a>, which enables us to concisely describe the components of a graphic. It ggplot2 allows users to incorporate various forms of complexity to their visualizations without additional hassle, and remove them with ease if necessary.</p>
-<p>While plotly is also an open-source package designed by a technical computing company and gains popularity over past years though it is younger than ggplot2. It has simple syntax and is compatible with many languages. Plotly’s visualization library offers users enhanced interactivity features, such as the ability to interact with graphs on display.</p>
-<p>Both ggplot2 and plotly uses GitHub for version control and code management. And we would like to see and compare the development of these two packages through data crawled from GitHub REST API. Specifically, we will crawl commits of main branch, issues, and pull requests for both packages. And the problems we have are:</p>
+<p><a href="https://ggplot2.tidyverse.org/">ggplot2</a> is an open-source data visualization package and an implementation of <a href="https://vita.had.co.nz/papers/layered-grammar.pdf">A Layered Grammar of Graphics</a>, which enables us to concisely describe the components of a graphic. It ggplot2 allows users to incorporate various forms of complexity to their visualizations without additional hassle, and remove them with ease if necessary.</p>
+<p>While <a href="https://plotly.com/r/">plotly</a> is also an open-source package designed by a technical computing company and gains popularity over past years though it is younger than ggplot2. It has simple syntax and is compatible with many languages. Plotly’s visualization library offers users enhanced interactivity features, such as the ability to interact with graphs on display.</p>
+<p>Both <a href="https://github.com/tidyverse/ggplot2">ggplot2</a> and <a href="https://github.com/plotly/plotly.R">plotly</a> uses GitHub for version control and code management. And we would like to see and compare the development of these two packages through data crawled from GitHub REST API. Specifically, we will crawl commits of main branch, issues, and pull requests for both packages. And the problems we have are:</p>
 <ol style="list-style-type: decimal">
 <li>The quantity pattern of pull requests, issues and commits for these two packages during time.<br />
 </li>
